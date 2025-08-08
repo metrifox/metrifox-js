@@ -1,6 +1,6 @@
 {
   "name": "metrifox-js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Official JavaScript library for Metrifox usage tracking and access control",
   "type": "module",
   "main": "dist/index.js",

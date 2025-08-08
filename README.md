@@ -231,7 +231,11 @@ interface AccessResponse {
   quota: number;
   balance: number;
   next_reset_at: number;
-  // ... other fields
+  message: string;
+  required_quantity: number;
+  included_usage: number;
+  unlimited: boolean;
+  carryover_quantity: number;
 }
 ```
 

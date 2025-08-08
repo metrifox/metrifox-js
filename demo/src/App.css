@@ -1,0 +1,280 @@
+/* Metrifox Brand Colors */
+:root {
+  --metrifox-primary: #0f0f0f;
+  --metrifox-primary-hover: #2a2a2a;
+  --metrifox-dark: #0f0f0f;
+  --metrifox-gray: #636562;
+  --metrifox-light-gray: #f8fafc;
+  --metrifox-border: #e2e8f0;
+  --metrifox-success: #10b981;
+  --metrifox-error: #ef4444;
+  --metrifox-success-bg: #ecfdf5;
+  --metrifox-error-bg: #fef2f2;
+  --metrifox-neutral: #6b7280;
+  --metrifox-neutral-light: #f9fafb;
+}
+
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: #fafbfc;
+  color: var(--metrifox-dark);
+  line-height: 1.6;
+}
+
+/* Toast animations */
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Main container */
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  min-height: 100vh;
+}
+
+/* Header with logo and title */
+.app-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.metrifox-logo {
+  height: 32px;
+  width: auto;
+}
+
+.app-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--metrifox-dark);
+  margin: 0;
+}
+
+.app-subtitle {
+  font-size: 1.1rem;
+  color: var(--metrifox-gray);
+  font-weight: 400;
+  margin: 0;
+}
+
+/* Main content layout */
+.content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: stretch;
+}
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  animation: slideInFromTop 0.4s ease-out;
+  font-weight: 500;
+  font-size: 14px;
+  max-width: 500px;
+  text-align: center;
+  word-break: break-word;
+}
+
+.toast.success {
+  background-color: var(--metrifox-success-bg);
+  color: var(--metrifox-success);
+  border: 1px solid #a7f3d0;
+}
+
+.toast.error {
+  background-color: var(--metrifox-error-bg);
+  color: var(--metrifox-error);
+  border: 1px solid #fecaca;
+  font-weight: 600;
+}
+
+/* Left side content */
+.main-content {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--metrifox-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.content-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--metrifox-dark);
+  margin-bottom: 8px;
+}
+
+.content-description {
+  color: var(--metrifox-gray);
+  margin-bottom: 32px;
+  font-size: 15px;
+  flex: 1;
+}
+
+/* Button styling - Dark like your actual buttons */
+.create-button {
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  background: var(--metrifox-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.create-button:hover {
+  background: var(--metrifox-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.create-button:active {
+  transform: translateY(0);
+  background: var(--metrifox-primary);
+}
+
+/* Right side response panel */
+.response-panel {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--metrifox-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.response-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--metrifox-dark);
+  margin-bottom: 24px;
+}
+
+/* Response box */
+.response-box {
+  background: var(--metrifox-neutral-light);
+  border: 1px solid var(--metrifox-border);
+  border-radius: 8px;
+  padding: 24px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.response-box div {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.response-box div:last-child {
+  margin-bottom: 0;
+}
+
+.response-box strong {
+  font-weight: 600;
+  color: var(--metrifox-dark);
+  min-width: 120px;
+}
+
+/* Color indicators */
+.access-yes {
+  color: var(--metrifox-success);
+  font-weight: 600;
+}
+
+.access-no {
+  color: var(--metrifox-error);
+  font-weight: 600;
+}
+
+.balance-positive {
+  color: var(--metrifox-success);
+  font-weight: 600;
+}
+
+.balance-negative {
+  color: var(--metrifox-error);
+  font-weight: 600;
+}
+
+/* Empty state */
+.empty-response {
+  background: var(--metrifox-neutral-light);
+  border: 2px dashed var(--metrifox-border);
+  border-radius: 8px;
+  padding: 40px 24px;
+  color: var(--metrifox-gray);
+  font-style: italic;
+  text-align: center;
+  font-size: 15px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .content-wrapper {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .app-title {
+    font-size: 2rem;
+  }
+  
+  .main-content,
+  .response-panel {
+    padding: 24px;
+  }
+  
+  .toast {
+    left: 20px;
+    right: 20px;
+    transform: none;
+    max-width: none;
+  }
+}

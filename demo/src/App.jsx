@@ -1,9 +1,10 @@
-import { checkAccess, recordUsage } from 'metrifox-js';
-import { useState } from 'react';
+import { checkAccess, recordUsage, embedCheckout } from 'metrifox-js';
+import { useEffect, useState, useRef } from 'react';
 import './App.css';
 import metrifoxLogo from './metrifox_logo.svg';
 
 const App = () => {
+    const containerRef = useRef(null);
     const [accessResponse, setAccessResponse] = useState(null)
     const [message, setMessage] = useState(null)
 
@@ -14,7 +15,7 @@ const App = () => {
                 customerKey: 'cust-70ce1e51'
             })
             setAccessResponse(access)
-            
+
             if (access.can_access) {
                 setMessage('Form created successfully!')
                 await recordUsage({
@@ -35,7 +36,19 @@ const App = () => {
             setTimeout(() => setMessage(null), 3000)
         }
     }
-    
+
+    useEffect(() => {
+        if (containerRef.current) {
+            embedCheckout(
+                {
+                    tenantId: "5b9e14c6-bf49-44f1-b386-7129465a6d29",
+                    productId: "34cc99f1-1de8-41a3-a374-7744e2e14c2e",
+                    container: containerRef.current
+                }
+            )
+        }
+    }, [containerRef.current])
+
     return (
         <div className="app-container">
             {/* Toast Notification */}
@@ -44,7 +57,7 @@ const App = () => {
                     {message}
                 </div>
             )}
-            
+
             {/* Header with Logo and Title */}
             <header className="app-header">
                 <div className="header-content">
@@ -53,7 +66,7 @@ const App = () => {
                 </div>
                 <p className="app-subtitle">Test the Metrifox JavaScript SDK with real API calls</p>
             </header>
-            
+
             {/* Main Content */}
             <div className="content-wrapper">
                 <div className="main-content">
@@ -65,14 +78,14 @@ const App = () => {
                         Create Form
                     </button>
                 </div>
-                
+
                 <div className="response-panel">
                     <h3 className="response-title">API Response</h3>
                     {accessResponse ? (
                         <div className="response-box">
                             <div><strong>Message:</strong> {accessResponse.message}</div>
                             <div>
-                                <strong>Can Access:</strong> 
+                                <strong>Can Access:</strong>
                                 <span className={accessResponse.can_access ? 'access-yes' : 'access-no'}>
                                     {accessResponse.can_access ? ' Yes' : ' No'}
                                 </span>
@@ -83,7 +96,7 @@ const App = () => {
                             <div><strong>Quota:</strong> {accessResponse.quota}</div>
                             <div><strong>Included:</strong> {accessResponse.included_usage}</div>
                             <div>
-                                <strong>Balance:</strong> 
+                                <strong>Balance:</strong>
                                 <span className={accessResponse.balance < 0 ? 'balance-negative' : 'balance-positive'}>
                                     {accessResponse.balance}
                                 </span>
@@ -98,6 +111,7 @@ const App = () => {
                     )}
                 </div>
             </div>
+            <div ref={containerRef} ></div>
         </div>
     )
 }

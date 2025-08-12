@@ -87,6 +87,7 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 40px;
   align-items: stretch;
+  margin-bottom: 40px;
 }
 
 /* Toast notification */

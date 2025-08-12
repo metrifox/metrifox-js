@@ -41,6 +41,12 @@ export interface UsageEventResponse {
   customerKey: string;
 }
 
+export interface EmbedConfig {
+  container: string | HTMLElement;
+  tenantId: string;
+  productId: string;
+}
+
 export class MetrifoxError extends Error {
   public status: number;
   public statusText: string;
@@ -173,6 +179,55 @@ class MetrifoxSDK {
   }
 
   /**
+   * Embed product list/checkout into a container on host page.
+   */
+  embedCheckout(config: EmbedConfig) {
+    const { container, tenantId, productId } = config;
+    if (!config.container) {
+      throw new Error(
+        'embedCheckout: "container" is required and must be a DOM node or selector.'
+      );
+    }
+
+    let containerEl = null;
+
+    // Allow passing either a selector string or an actual DOM node
+    if (typeof container === "string") {
+      containerEl = document.querySelector(container);
+      if (!containerEl) {
+        throw new Error(
+          `embedCheckout: No element found for selector "${container}"`
+        );
+      }
+    } else if (container instanceof HTMLElement) {
+      containerEl = container;
+    } else {
+      throw new Error(
+        'embedCheckout: "container" must be a DOM element or selector string.'
+      );
+    }
+
+    // Clear previous iframe (avoids duplicates in React re-renders)
+    containerEl.innerHTML = "";
+
+    const iframe = document.createElement("iframe");
+
+    iframe.src = `http://localhost:3000/tenants/${config.tenantId}/products/${config.productId}?iframe-embed=true`;
+    iframe.width = "100%";
+    iframe.style.border = "none";
+    iframe.style.display = "block";
+    iframe.setAttribute("scrolling", "no");
+
+    window.addEventListener("message", (event) => {
+      if (event.data?.type === "IFRAME_HEIGHT") {
+        iframe.style.height = event.data.height + "px";
+      }
+    });
+
+    containerEl.appendChild(iframe);
+  }
+
+  /**
    * Update API key
    */
   setApiKey(apiKey: string): void {
@@ -224,6 +279,10 @@ export async function recordUsage(
   request: UsageEventRequest
 ): Promise<UsageEventResponse> {
   return getDefaultSDK().recordUsage(request);
+}
+
+export function embedCheckout(options: EmbedConfig) {
+  return getDefaultSDK().embedCheckout(options);
 }
 
 // Named exports

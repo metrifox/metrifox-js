@@ -41,7 +41,7 @@ const App = () => {
         if (containerRef.current) {
             embedCheckout(
                 {
-                    productId: "34cc99f1-1de8-41a3-a374-7744e2e14c2e",
+                    productId: "ba39b623-b795-469b-be54-e2cdef288c18",
                     container: containerRef.current
                 }
             )

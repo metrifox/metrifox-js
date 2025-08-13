@@ -7,6 +7,7 @@ declare const process: any;
 export interface MetrifoxConfig {
   apiKey?: string;
   baseUrl?: string;
+  webAppBaseUrl?: string;
 }
 
 export interface AccessCheckRequest {
@@ -79,6 +80,7 @@ export class MetrifoxError extends Error {
 class MetrifoxSDK {
   private apiKey: string;
   private baseUrl: string;
+  private webBaseUrl: string;
 
   constructor(config: MetrifoxConfig = {}) {
     // Auto-detect API key from multiple sources
@@ -86,6 +88,9 @@ class MetrifoxSDK {
 
     this.baseUrl =
       config.baseUrl || "https://metrifox-api.staging.useyala.com/api/v1/";
+
+    this.webBaseUrl =
+      config.webAppBaseUrl || "https://frontend-v3.staging.useyala.com";
 
     if (!this.apiKey) {
       throw new Error(
@@ -178,32 +183,49 @@ class MetrifoxSDK {
     return response.json();
   }
 
+  async getTenantId(): Promise<string> {
+    const url = new URL("auth/get-tenant-id", this.baseUrl);
+
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "x-api-key": this.apiKey,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error getting tenant id`);
+    }
+
+    const data = await response.json();
+    return data?.data.tenant_id;
+  }
+
   /**
    * Embed product list/checkout into a container on host page.
    */
-  embedCheckout(config: EmbedConfig) {
-    const { container, tenantId, productId } = config;
+  async embedCheckout(config: EmbedConfig) {
+    const tenantId = await this.getTenantId();
+    const { container, productId } = config;
+
     if (!config.container) {
       throw new Error(
         'embedCheckout: "container" is required and must be a DOM node or selector.'
       );
     }
 
-    let containerEl = null;
-
-    // Allow passing either a selector string or an actual DOM node
-    if (typeof container === "string") {
-      containerEl = document.querySelector(container);
-      if (!containerEl) {
-        throw new Error(
-          `embedCheckout: No element found for selector "${container}"`
-        );
-      }
-    } else if (container instanceof HTMLElement) {
-      containerEl = container;
-    } else {
+    const containerEl =
+      typeof container === "string"
+        ? document.querySelector(container)
+        : container instanceof HTMLElement
+        ? container
+        : null;
+    if (!containerEl) {
       throw new Error(
-        'embedCheckout: "container" must be a DOM element or selector string.'
+        typeof container === "string"
+          ? `embedCheckout: No element found for selector "${container}"`
+          : 'embedCheckout: "container" must be a DOM element or selector string.'
       );
     }
 
@@ -212,7 +234,7 @@ class MetrifoxSDK {
 
     const iframe = document.createElement("iframe");
 
-    iframe.src = `http://localhost:3000/tenants/${config.tenantId}/products/${config.productId}?iframe-embed=true`;
+    iframe.src = `${this.webBaseUrl}/tenants/${tenantId}/products/${productId}?iframe-embed=true`;
     iframe.width = "100%";
     iframe.style.border = "none";
     iframe.style.display = "block";

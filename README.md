@@ -112,8 +112,10 @@ await recordUsage({
 ### Embed plan and checkout pages
 
 ```javascript
+import { embedCheckout } from "metrifox-js";
+
+// Embed checkout pages within your application
 embedCheckout({
-  tenantId: "your_tenant_id",
   productId: "your_product_key",
   container: "#checkout-container", //query selector or DOM node
 });

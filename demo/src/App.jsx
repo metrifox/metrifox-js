@@ -41,7 +41,6 @@ const App = () => {
         if (containerRef.current) {
             embedCheckout(
                 {
-                    tenantId: "5b9e14c6-bf49-44f1-b386-7129465a6d29",
                     productId: "34cc99f1-1de8-41a3-a374-7744e2e14c2e",
                     container: containerRef.current
                 }

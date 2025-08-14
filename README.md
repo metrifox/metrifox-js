@@ -109,6 +109,18 @@ await recordUsage({
 });
 ```
 
+### Embed plan and checkout pages
+
+```javascript
+import { embedCheckout } from "metrifox-js";
+
+// Embed checkout pages within your application
+embedCheckout({
+  productId: "your_product_key",
+  container: "#checkout-container", //query selector or DOM node
+});
+```
+
 ### Complete Example
 
 ```javascript

@@ -61,3 +61,19 @@ export async function fetchTenantId(
   const data = await response.json();
   return data?.data?.tenant_id;
 }
+
+export async function fetchCheckoutKey(
+  baseUrl: string,
+  apiKey: string
+): Promise<string> {
+  const url = new URL("tenants/checkout-settings", baseUrl);
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
+  });
+
+  if (!response.ok) throw new Error("Failed to get tenant checkout settings");
+
+  const data = await response.json();
+  return data?.data?.checkout_username;
+}

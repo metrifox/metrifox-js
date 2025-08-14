@@ -41,7 +41,7 @@ const App = () => {
         if (containerRef.current) {
             embedCheckout(
                 {
-                    productId: "ba39b623-b795-469b-be54-e2cdef288c18",
+                    productKey: "product_fitflex+_4bea",
                     container: containerRef.current
                 }
             )

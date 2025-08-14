@@ -6,7 +6,11 @@ import {
   UsageEventResponse,
   EmbedConfig,
 } from "./utils/interface";
-import { fetchAccess, fetchUsage, fetchTenantId } from "./utils/api";
+import {
+  fetchAccess,
+  fetchUsage,
+  fetchCheckoutKey,
+} from "./utils/api";
 import { createIframe } from "./utils/embed-iframe";
 
 export class MetrifoxSDK {
@@ -47,20 +51,20 @@ export class MetrifoxSDK {
     return fetchUsage(this.baseUrl, this.apiKey, request);
   }
 
-  getTenantId(): Promise<string> {
-    return fetchTenantId(this.baseUrl, this.apiKey);
+  getCheckoutKey(): Promise<string> {
+    return fetchCheckoutKey(this.baseUrl, this.apiKey);
   }
 
   async embedCheckout(config: EmbedConfig) {
-    const tenantId = await this.getTenantId();
-    if (!tenantId)
+    const checkoutKey = await this.getCheckoutKey();
+    if (!checkoutKey)
       throw new Error(
-        "embed-iframe: Tenant ID could not be retrieved. Ensure the API key is valid"
+        "embed-iframe: Checkout Key could not be retrieved. Ensure the API key is valid"
       );
 
     createIframe(
       config.container,
-      `${this.webBaseUrl}/tenants/${tenantId}/products/${config.productId}?iframe-embed=true`
+      `${this.webBaseUrl}/${checkoutKey}/product/${config.productKey}?iframe-embed=true`
     );
   }
 

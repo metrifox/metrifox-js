@@ -38,6 +38,5 @@ export interface UsageEventResponse {
 
 export interface EmbedConfig {
   container: string | HTMLElement;
-  tenantId: string;
-  productId: string;
+  productKey: string;
 }

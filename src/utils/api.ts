@@ -66,7 +66,7 @@ export async function fetchCheckoutKey(
   baseUrl: string,
   apiKey: string
 ): Promise<string> {
-  const url = new URL("tenants/checkout-settings", baseUrl);
+  const url = new URL("auth/checkout-username", baseUrl);
   const response = await fetch(url.toString(), {
     method: "GET",
     headers: { "x-api-key": apiKey, "Content-Type": "application/json" },

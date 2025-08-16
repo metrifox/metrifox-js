@@ -1,5 +1,4 @@
 import MetrifoxSDK, { checkAccess, recordUsage, init } from "../index";
-import {rejects} from "node:assert";
 
 // Type declaration for Jest globals
 declare var global: any;
@@ -64,7 +63,7 @@ describe("MetrifoxSDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api.metrifox.com/usage/access?feature_key=test-feature&customer_key=test-customer",
+        "https://metrifox-api.staging.useyala.com/api/v1/usage/access?feature_key=test-feature&customer_key=test-customer",
         {
           method: "GET",
           headers: {
@@ -116,7 +115,7 @@ describe("MetrifoxSDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api.metrifox.com/usage/events",
+        "https://metrifox-api.staging.useyala.com/api/v1/usage/events",
         {
           method: "POST",
           headers: {
@@ -186,7 +185,7 @@ describe("MetrifoxSDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-          "https://api.metrifox.com/api/v1/webhooks",
+          "https://metrifox-api.staging.useyala.com/api/v1/webhooks",
           {
             method: "POST",
             headers: {
@@ -242,7 +241,7 @@ describe("MetrifoxSDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-          "https://api.metrifox.com/api/v1/webhooks",
+          "https://metrifox-api.staging.useyala.com/api/v1/webhooks",
           {
             method: "POST",
             headers: {

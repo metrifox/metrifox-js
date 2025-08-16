@@ -1,6 +1,8 @@
 import {
   AccessCheckRequest,
   AccessResponse,
+  CustomerSyncRequest,
+  CustomerSyncResponse,
   UsageEventRequest,
   UsageEventResponse,
 } from "./interface";
@@ -77,3 +79,28 @@ export async function fetchCheckoutKey(
   const data = await response.json();
   return data?.data?.checkout_username;
 }
+
+export async function synchronizeCustomer(
+    baseUrl: string,
+    apiKey: string,
+    request: CustomerSyncRequest
+): Promise<CustomerSyncResponse> {
+  try {
+    const url = new URL("/api/v1/webhooks", baseUrl);
+    console.log("Customer Sync Request", url.toString())
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify(request)
+    });
+
+    if (!response.ok) throw new Error("Failed to Sync Customer");
+
+    return response.json();
+  } catch (error) {
+    console.log("ERROR LOGGED", error)
+    throw error;
+  }
+
+}
+

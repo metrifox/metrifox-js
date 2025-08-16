@@ -1,4 +1,4 @@
-import { MetrifoxSDK } from "./sdk";
+import { MetrifoxSDK,  } from "./sdk";
 export * from "./utils/interface";
 
 let defaultSDK: MetrifoxSDK | null = null;
@@ -19,6 +19,10 @@ export function checkAccess(request: any) {
 
 export function recordUsage(request: any) {
   return getDefaultSDK().recordUsage(request);
+}
+
+export function synchronizeCustomer(request: any) {
+  return getDefaultSDK().syncCustomer(request);
 }
 
 export function embedCheckout(config: any) {

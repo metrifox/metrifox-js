@@ -5,11 +5,14 @@ import {
   UsageEventRequest,
   UsageEventResponse,
   EmbedConfig,
+  CustomerSyncResponse,
+  CustomerSyncRequest
 } from "./utils/interface";
 import {
   fetchAccess,
   fetchUsage,
   fetchCheckoutKey,
+  synchronizeCustomer,
 } from "./utils/api";
 import { createIframe } from "./utils/embed-iframe";
 
@@ -21,7 +24,7 @@ export class MetrifoxSDK {
   constructor(config: MetrifoxConfig = {}) {
     this.apiKey = config.apiKey || this.getApiKeyFromEnvironment();
     this.baseUrl =
-      config.baseUrl || "https://metrifox-api.staging.useyala.com/api/v1/";
+      config.baseUrl || "https://api.metrifox.com/";
     this.webBaseUrl =
       config.webAppBaseUrl || "https://frontend-v3.staging.useyala.com";
 
@@ -66,6 +69,10 @@ export class MetrifoxSDK {
       config.container,
       `${this.webBaseUrl}/${checkoutKey}/product/${config.productKey}?iframe-embed=true`
     );
+  }
+
+  syncCustomer(request: CustomerSyncRequest): Promise<CustomerSyncResponse> {
+    return synchronizeCustomer(this.baseUrl, this.apiKey, request);
   }
 
   setApiKey(apiKey: string) {

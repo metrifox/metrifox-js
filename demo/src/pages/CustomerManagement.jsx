@@ -161,10 +161,24 @@ const CustomerManagement = () => {
                 };
 
 
-                setCustomers(prev => [newCustomer, ...prev]);
+
                 // Create new customer
                 response = await synchronizeCustomer(customerData);
-                console.log("SYNC RESPONSE FROM SDK CALL", response);
+
+                const newData = {
+                    customerKey: newCustomer.data.customer_key,
+                    primaryEmail: newCustomer.data.primary_email,
+                    customerType: newCustomer.data.customer_type,
+                    firstName: newCustomer.data.first_name,
+                    lastName: newCustomer.data.last_name,
+                    legalName: newCustomer.data.legal_name,
+                    displayName: newCustomer.data.display_name,
+                    phone: newCustomer.data.primary_phone,
+                    metrifoxId: response.data.metrifox_id,
+                    syncStatus: 'synced'
+                }
+
+                setCustomers(prev => [newData, ...prev]);
                 showMessage('Customer Syned successfully!', 'success');
             }
 
@@ -277,7 +291,7 @@ const CustomerManagement = () => {
             {/* Header */}
             <div className="page-header">
                 <div className="header-content">
-                    <h1 className="page-title">Customer Management</h1>
+                    <h1 className="page-subtitle">Customer Management</h1>
                     <p className="page-subtitle">
                         Sync your existing customers with Metrifox to enable usage tracking and billing
                     </p>

@@ -1,4 +1,4 @@
-import { MetrifoxSDK,  } from "./sdk";
+import { MetrifoxSDK } from "./sdk";
 export * from "./utils/interface";
 
 let defaultSDK: MetrifoxSDK | null = null;

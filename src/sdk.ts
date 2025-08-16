@@ -24,7 +24,7 @@ export class MetrifoxSDK {
   constructor(config: MetrifoxConfig = {}) {
     this.apiKey = config.apiKey || this.getApiKeyFromEnvironment();
     this.baseUrl =
-      config.baseUrl || "https://api.metrifox.com/";
+      config.baseUrl || "https://metrifox-api.staging.useyala.com/api/v1/";
     this.webBaseUrl =
       config.webAppBaseUrl || "https://frontend-v3.staging.useyala.com";
 

@@ -87,7 +87,6 @@ export async function synchronizeCustomer(
 ): Promise<CustomerSyncResponse> {
   try {
     const url = new URL("/api/v1/webhooks", baseUrl);
-    console.log("Customer Sync Request", url.toString())
     const response = await fetch(url.toString(), {
       method: "POST",
       headers: { "x-api-key": apiKey, "Content-Type": "application/json" },

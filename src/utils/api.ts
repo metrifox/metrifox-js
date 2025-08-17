@@ -97,7 +97,7 @@ export async function synchronizeCustomer(
 
     return response.json();
   } catch (error) {
-    console.log("ERROR LOGGED", error)
+    console.error("Failed to synchronize customer:", error)
     throw error;
   }
 

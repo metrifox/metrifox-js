@@ -38,8 +38,8 @@ export interface UsageEventResponse {
 
 type EventType = 'customer.created' | 'customer.updated' | 'customer.deleted';
 
-export interface CustomerSyncRequest {
-  event_name: EventType
+export interface CustomerCreateUpdateRequest {
+  event_name: Exclude<EventType, 'customer.deleted'>
   data?: {
     customer_key: string;
     primary_email?: string;
@@ -51,6 +51,15 @@ export interface CustomerSyncRequest {
     legal_name?: string;
   }
 }
+
+export interface CustomerDeleteRequest {
+  event_name: Extract<EventType, 'customer.deleted'>
+  data?: {
+    customer_key: string;
+  }
+}
+
+export type CustomerSyncRequest = CustomerCreateUpdateRequest | CustomerDeleteRequest;
 
 export interface CustomerSyncResponse {
   statusCode: number;

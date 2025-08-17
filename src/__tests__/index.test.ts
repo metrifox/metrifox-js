@@ -265,6 +265,52 @@ describe("MetrifoxSDK", () => {
       expect(result).toEqual(mockResponse);
     });
 
+    it("should make correct API call for customer delete sync", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        message: "Customer Sync Successful",
+        data: {
+          customer_key: "test-customer-key",
+          metrifox_id: "metrifox-id",
+          deleted_at: "2025-08-17T15:49:50+01:00",
+        },
+        errors: {},
+        meta: {}
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const sdk = new MetrifoxSDK({ apiKey: "test-key" });
+      const result = await sdk.syncCustomer({
+        event_name: "customer.deleted",
+        data: {
+          customer_key: "test-customer-key"
+        }
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+          "https://metrifox-api.staging.useyala.com/api/v1/webhooks",
+          {
+            method: "POST",
+            headers: {
+              "x-api-key": "test-key",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              event_name: "customer.deleted",
+              data: {
+                customer_key: "test-customer-key"
+              }
+            }),
+          }
+      );
+
+      expect(result).toEqual(mockResponse);
+    });
+
     it("should throw error on failed customer update", async () => {
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,

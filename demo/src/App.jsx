@@ -1,9 +1,9 @@
 import { checkAccess, recordUsage, embedCheckout } from 'metrifox-js';
 import { useEffect, useState, useRef } from 'react';
 import './App.css';
-import './pages/CustomerManagement.css'
 import metrifoxLogo from './assets/metrifox_logo.svg';
 import CustomerManagement from './pages/CustomerManagement';
+import CsvUpload from './pages/CsvUpload';
 
 const App = ({ customerKey = 'cust-70ce1e51', featureKey = 'feature_forms', eventName = 'form.created' }) => {
     const containerRef = useRef(null);
@@ -19,19 +19,15 @@ const App = ({ customerKey = 'cust-70ce1e51', featureKey = 'feature_forms', even
             });
             setAccessResponse(access);
 
-            // Fix: Use camelCase property names as returned by your SDK
             if (access.canAccess) {
                 setMessage('Form created successfully!');
                 await recordUsage({
                     customerKey: customerKey,
                     eventName: eventName
-                    // amount defaults to 1, no need to specify unless above 1
                 });
-                // Clear the message after 3 seconds
                 setTimeout(() => setMessage(null), 3000);
             } else {
                 setMessage('Access denied - quota exceeded');
-                // Clear the message after 3 seconds
                 setTimeout(() => setMessage(null), 3000);
             }
         } catch (error) {
@@ -52,14 +48,12 @@ const App = ({ customerKey = 'cust-70ce1e51', featureKey = 'feature_forms', even
 
     return (
         <div className="app-container">
-            {/* Toast Notification */}
             {message && (
                 <div className={`toast ${message.includes('successfully') ? 'success' : 'error'}`}>
                     {message}
                 </div>
             )}
 
-            {/* Header with Logo and Title */}
             <header className="app-header">
                 <div className="header-content">
                     <img src={metrifoxLogo} alt="Metrifox" className="metrifox-logo" />
@@ -68,7 +62,6 @@ const App = ({ customerKey = 'cust-70ce1e51', featureKey = 'feature_forms', even
                 <p className="app-subtitle">Test the Metrifox JavaScript SDK with real API calls</p>
             </header>
 
-            {/* Tab Navigation */}
             <div className="tab-navigation">
                 <button
                     className={`tab-button ${activeTab === 'forms' ? 'active' : ''}`}
@@ -83,6 +76,12 @@ const App = ({ customerKey = 'cust-70ce1e51', featureKey = 'feature_forms', even
                     Customer Management
                 </button>
                 <button
+                    className={`tab-button ${activeTab === 'csv' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('csv')}
+                >
+                    CSV Import
+                </button>
+                <button
                     className={`tab-button ${activeTab === 'checkout' ? 'active' : ''}`}
                     onClick={() => setActiveTab('checkout')}
                 >
@@ -90,7 +89,6 @@ const App = ({ customerKey = 'cust-70ce1e51', featureKey = 'feature_forms', even
                 </button>
             </div>
 
-            {/* Tab Content */}
             {activeTab === 'forms' && (
                 <div className="content-wrapper">
                     <div className="main-content">
@@ -142,9 +140,8 @@ const App = ({ customerKey = 'cust-70ce1e51', featureKey = 'feature_forms', even
                 </div>
             )}
 
-            {activeTab === 'customers' && (
-                <CustomerManagement />
-            )}
+            {activeTab === 'customers' && <CustomerManagement />}
+            {activeTab === 'csv' && <CsvUpload />}
 
             {activeTab === 'checkout' && (
                 <div className="checkout-container">

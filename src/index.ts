@@ -29,4 +29,8 @@ export function embedCheckout(config: any) {
   return getDefaultSDK().embedCheckout(config);
 }
 
+export function uploadCustomersCsv(file: File) {
+  return getDefaultSDK().uploadCustomersCsv(file);
+}
+
 export default MetrifoxSDK;

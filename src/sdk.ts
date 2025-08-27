@@ -6,13 +6,14 @@ import {
   UsageEventResponse,
   EmbedConfig,
   CustomerSyncResponse,
-  CustomerSyncRequest
+  CustomerSyncRequest, CustomerCSVSyncResponse
 } from "./utils/interface";
 import {
   fetchAccess,
   fetchUsage,
   fetchCheckoutKey,
   synchronizeCustomer,
+    uploadCustomersCsv
 } from "./utils/api";
 import { createIframe } from "./utils/embed-iframe";
 
@@ -73,6 +74,10 @@ export class MetrifoxSDK {
 
   syncCustomer(request: CustomerSyncRequest): Promise<CustomerSyncResponse> {
     return synchronizeCustomer(this.baseUrl, this.apiKey, request);
+  }
+
+  uploadCustomersCsv(file: File): Promise<CustomerCSVSyncResponse> {
+    return uploadCustomersCsv(this.baseUrl, this.apiKey, file);
   }
 
   setApiKey(apiKey: string) {

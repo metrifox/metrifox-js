@@ -1,6 +1,6 @@
 import {
   AccessCheckRequest,
-  AccessResponse,
+  AccessResponse, CustomerCSVSyncResponse,
   CustomerSyncRequest,
   CustomerSyncResponse,
   UsageEventRequest,
@@ -100,6 +100,27 @@ export async function synchronizeCustomer(
     console.log("ERROR LOGGED", error)
     throw error;
   }
+}
 
+export async function uploadCustomersCsv(
+    baseUrl: string,
+    apiKey: string,
+    file: File
+): Promise<CustomerCSVSyncResponse> {
+  const url = new URL("/api/v1/webhooks", baseUrl);
+
+  const formData = new FormData();
+  formData.append("event_name", "customer.csv_uploaded");
+  formData.append('file', file);
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: { "x-api-key": apiKey },
+    body: formData,
+  });
+
+  if (!response.ok) throw new Error("Failed to upload CSV");
+
+  return response.json();
 }
 

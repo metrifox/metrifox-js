@@ -158,7 +158,7 @@ export async function uploadCustomersCsv(
   const url = new URL("/api/v1/customers/csv-upload", baseUrl);
 
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('csv', file);
 
   const response = await fetch(url.toString(), {
     method: "POST",

@@ -155,10 +155,9 @@ export async function uploadCustomersCsv(
     apiKey: string,
     file: File
 ): Promise<CustomerCSVSyncResponse> {
-  const url = new URL("/api/v1/webhooks", baseUrl);
+  const url = new URL("/api/v1/customers/csv-upload", baseUrl);
 
   const formData = new FormData();
-  formData.append("event_name", "customer.csv_uploaded");
   formData.append('file', file);
 
   const response = await fetch(url.toString(), {

@@ -151,24 +151,24 @@ const CsvUpload = () => {
                         </div>
                         <div className="summary-stat success">
                             <CheckCircle size={16} />
-                            <span className="stat-number">{results.successful_sync_count}</span>
+                            <span className="stat-number">{results.successful_upload_count}</span>
                             <span className="stat-label">Success</span>
                         </div>
                         <div className="summary-stat error">
                             <XCircle size={16} />
-                            <span className="stat-number">{results.sync_failure_count}</span>
+                            <span className="stat-number">{results.failed_upload_count}</span>
                             <span className="stat-label">Failed</span>
                         </div>
                     </div>
 
-                    {results.sync_failure_count > 0 && (
+                    {results.failed_upload_count > 0 && (
                         <div className="failed-section">
                             <h4 className="section-title">
                                 <AlertTriangle size={16} />
-                                Failed Imports ({results.sync_failure_count})
+                                Failed Imports ({results.failed_upload_count})
                             </h4>
                             <div className="failed-list">
-                                {results.failed_sync_customers.map((failed, idx) => (
+                                {results.customers_failed.map((failed, idx) => (
                                     <div key={idx} className="failed-item">
                                         <span className="row-number">Row {failed.row}</span>
                                         <span className="customer-key">{failed.customer_key}</span>
@@ -179,23 +179,23 @@ const CsvUpload = () => {
                         </div>
                     )}
 
-                    {results.successful_sync_count > 0 && (
+                    {results.successful_upload_count > 0 && (
                         <div className="success-section">
                             <h4 className="section-title">
                                 <CheckCircle size={16} />
-                                Successful Imports ({results.successful_sync_count})
+                                Successful Imports ({results.successful_upload_count})
                             </h4>
                             <div className="success-list">
-                                {results.successfully_synced_customers.slice(0, 5).map((success, idx) => (
+                                {results.customers_added.slice(0, 5).map((success, idx) => (
                                     <div key={idx} className="success-item">
                                         <span className="row-number">Row {success.row}</span>
                                         <span className="customer-key">{success.customer_key}</span>
                                         <span className="status">Synced</span>
                                     </div>
                                 ))}
-                                {results.successful_sync_count > 5 && (
+                                {results.successful_upload_count > 5 && (
                                     <div className="more-items">
-                                        +{results.successful_sync_count - 5} more customers synced
+                                        +{results.successful_upload_count - 5} more customers synced
                                     </div>
                                 )}
                             </div>

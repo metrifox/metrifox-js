@@ -152,32 +152,20 @@ export interface CustomerDeleteRequest {
   customer_key: string;
 }
 
-export interface CustomerViewRequest {
-  customer_key: string;
-}
-
-export interface CustomerSyncResponse {
-  statusCode: number;
-  message?: string;
-  data: any;
-  errors?: any;
-  meta?: any;
-}
 
 export interface CustomerCSVSyncResponse {
   statusCode: number;
   message?: string;
   data: {
-    last_synced_at: String;
     total_customers: number;
-    successful_sync_count: number;
-    sync_failure_count: number;
-    successfully_synced_customers: Array<{
+    successful_upload_count: number;
+    failed_upload_count: number;
+    customers_added: Array<{
       row: number;
       customer_key: string;
       data: any;
     }>;
-    failed_sync_customers: Array<{
+    customers_failed: Array<{
       row: number;
       customer_key: string;
       error: string;

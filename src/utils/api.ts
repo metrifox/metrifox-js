@@ -1,8 +1,11 @@
 import {
   AccessCheckRequest,
-  AccessResponse, CustomerCSVSyncResponse,
-  CustomerSyncRequest,
+  AccessResponse,
+  CustomerCreateRequest,
+  CustomerCSVSyncResponse,
+  CustomerDeleteRequest,
   CustomerSyncResponse,
+  CustomerUpdateRequest,
   UsageEventRequest,
   UsageEventResponse,
 } from "./interface";
@@ -80,20 +83,20 @@ export async function fetchCheckoutKey(
   return data?.data?.checkout_username;
 }
 
-export async function synchronizeCustomer(
+export async function customerCreateRequest(
     baseUrl: string,
     apiKey: string,
-    request: CustomerSyncRequest
+    request: CustomerCreateRequest
 ): Promise<CustomerSyncResponse> {
   try {
-    const url = new URL("/api/v1/webhooks", baseUrl);
+    const url = new URL("/api/v1/customers/new", baseUrl);
     const response = await fetch(url.toString(), {
       method: "POST",
       headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
       body: JSON.stringify(request)
     });
 
-    if (!response.ok) throw new Error("Failed to Sync Customer");
+    if (!response.ok) throw new Error("Failed to Create Customer");
 
     return response.json();
   } catch (error) {
@@ -101,6 +104,51 @@ export async function synchronizeCustomer(
     throw error;
   }
 }
+
+export async function customerUpdateRequest(
+    baseUrl: string,
+    apiKey: string,
+    request: CustomerUpdateRequest
+): Promise<CustomerSyncResponse> {
+  try {
+    const url = new URL(`/api/v1/customers/${request.customer_key}`, baseUrl);
+    const response = await fetch(url.toString(), {
+      method: "PATCH",
+      headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify(request)
+    });
+
+    if (!response.ok) throw new Error("Failed to UPDATE Customer");
+
+    return response.json();
+  } catch (error) {
+    console.log("ERROR LOGGED", error)
+    throw error;
+  }
+}
+
+export async function customerDeleteRequest(
+    baseUrl: string,
+    apiKey: string,
+    request: CustomerDeleteRequest
+): Promise<CustomerSyncResponse> {
+  try {
+    const url = new URL(`/api/v1/customers/${request.customer_key}`, baseUrl);
+    console.log("URL", url)
+    const response = await fetch(url.toString(), {
+      method: "DELETE",
+      headers: { "x-api-key": apiKey, "Content-Type": "application/json" }
+    });
+
+    if (!response.ok) throw new Error("Failed to DELETE Customer");
+
+    return response.json();
+  } catch (error) {
+    console.log("ERROR LOGGED", error)
+    throw error;
+  }
+}
+
 
 export async function uploadCustomersCsv(
     baseUrl: string,

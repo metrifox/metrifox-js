@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { synchronizeCustomer } from 'metrifox-js';
+import { createCustomer, updateCustomer, deleteCustomer as SDKDeleteCustomer } from 'metrifox-js';
 import { Plus, Edit2, Trash2, RefreshCw, X, User, Building } from 'lucide-react';
 
 const CustomerManagement = () => {
@@ -8,25 +8,33 @@ const CustomerManagement = () => {
         // Mock data - in real app this would come from your database
         {
             id: 1,
-            customerKey: 'cust-70ce1e52',
-            primaryEmail: 'jane.doe@example.com',
-            customerType: 'INDIVIDUAL',
-            firstName: 'John',
-            lastName: 'Doe',
-            phone: '+1234567890',
-            lastSyncedAt: '2024-01-15T10:30:00Z',
+            customer_key: 'cust-70ce1e52',
+            primary_email: 'jane.doe@example.com',
+            customer_type: 'INDIVIDUAL',
+            first_name: 'Jane',
+            last_name: 'Doe',
+            primary_phone: '+1234567890',
+            created_at: '2024-01-15T10:30:00Z',
+            updated_at: '2024-01-15T10:30:00Z',
+            currency: 'USD',
+            language: 'en',
+            tax_status: 'TAXABLE',
             metrifoxId: 'mf_cust_123',
             syncStatus: 'synced'
         },
         {
             id: 2,
-            customerKey: 'cust-business-457',
-            primaryEmail: 'ceo@example-business.com',
-            customerType: 'BUSINESS',
-            legalName: 'Example Business LLC',
-            displayName: 'Example Business',
-            phone: '+1987654321',
-            lastSyncedAt: null,
+            customer_key: 'cust-business-457',
+            primary_email: 'ceo@example-business.com',
+            customer_type: 'BUSINESS',
+            legal_name: 'Example Business LLC',
+            display_name: 'Example Business',
+            primary_phone: '+1987654321',
+            created_at: '2024-01-10T08:15:00Z',
+            updated_at: null,
+            currency: 'USD',
+            language: 'en',
+            tax_status: 'REVERSE_CHARGE',
             metrifoxId: null,
             syncStatus: 'pending'
         }
@@ -34,150 +42,141 @@ const CustomerManagement = () => {
 
     const [modalOpen, setModalOpen] = useState(false);
     const [editingCustomer, setEditingCustomer] = useState(null);
-    const [customerForm, setCustomerForm] = useState({
-        // Core fields
-        customerType: 'INDIVIDUAL',
-        customerKey: '',
-        primaryEmail: '',
-        primaryPhone: '',
-
-        // Business fields
-        legalName: '',
-        displayName: '',
-        legalNumber: '',
-        taxIdentificationNumber: '',
-        logoUrl: '',
-        websiteUrl: '',
-        accountManager: '',
-
-        // Individual fields
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        dateOfBirth: '',
-
-        // Shared fields
-        billingEmail: '',
-
-        // Preferences
-        timezone: '',
-        language: 'en',
-        currency: 'USD',
-        taxStatus: 1,
-
-        // Address fields
-        addressLine1: '',
-        addressLine2: '',
-        city: '',
-        state: '',
-        country: '',
-        zipCode: '',
-
-        // Shipping address fields
-        shippingAddressLine1: '',
-        shippingAddressLine2: '',
-        shippingCity: '',
-        shippingState: '',
-        shippingCountry: '',
-        shippingZipCode: ''
-    });
-
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [customerForm, setCustomerForm] = useState(getEmptyForm());
     const [customerResponse, setCustomerResponse] = useState(null);
     const [syncingCustomer, setSyncingCustomer] = useState(null);
     const [deletingCustomer, setDeletingCustomer] = useState(null);
     const [activeTab, setActiveTab] = useState('basic');
+
+    function getEmptyForm() {
+        return {
+            // Core fields
+            customer_type: 'INDIVIDUAL',
+            customer_key: '',
+            primary_email: '',
+            primary_phone: '',
+
+            // Business fields
+            legal_name: '',
+            display_name: '',
+            legal_number: '',
+            tax_identification_number: '',
+            logo_url: '',
+            website_url: '',
+            account_manager: '',
+
+            // Individual fields
+            first_name: '',
+            middle_name: '',
+            last_name: '',
+            date_of_birth: '',
+
+            // Shared fields
+            billing_email: '',
+
+            // Preferences
+            timezone: '',
+            language: 'en',
+            currency: 'USD',
+            tax_status: 'TAXABLE',
+
+            // Address fields
+            address_line1: '',
+            address_line2: '',
+            city: '',
+            state: '',
+            country: '',
+            zip_code: '',
+
+            // Shipping address fields
+            shipping_address_line1: '',
+            shipping_address_line2: '',
+            shipping_city: '',
+            shipping_state: '',
+            shipping_country: '',
+            shipping_zip_code: ''
+        };
+    }
+
+    function mapCustomerToForm(customer) {
+        return {
+            customer_type: customer.customer_type,
+            customer_key: customer.customer_key,
+            primary_email: customer.primary_email || '',
+            primary_phone: customer.primary_phone || '',
+            first_name: customer.first_name || '',
+            middle_name: customer.middle_name || '',
+            last_name: customer.last_name || '',
+            date_of_birth: customer.date_of_birth || '',
+            legal_name: customer.legal_name || '',
+            display_name: customer.display_name || '',
+            legal_number: customer.legal_number || '',
+            tax_identification_number: customer.tax_identification_number || '',
+            logo_url: customer.logo_url || '',
+            website_url: customer.website_url || '',
+            account_manager: customer.account_manager || '',
+            billing_email: customer.billing_email || '',
+            timezone: customer.timezone || '',
+            language: customer.language || 'en',
+            currency: customer.currency || 'USD',
+            tax_status: customer.tax_status || 'TAXABLE',
+            address_line1: customer.address_line1 || '',
+            address_line2: customer.address_line2 || '',
+            city: customer.city || '',
+            state: customer.state || '',
+            country: customer.country || '',
+            zip_code: customer.zip_code || '',
+            shipping_address_line1: customer.shipping_address_line1 || '',
+            shipping_address_line2: customer.shipping_address_line2 || '',
+            shipping_city: customer.shipping_city || '',
+            shipping_state: customer.shipping_state || '',
+            shipping_country: customer.shipping_country || '',
+            shipping_zip_code: customer.shipping_zip_code || ''
+        };
+    }
 
     const showMessage = (msg, type = 'info') => {
         setMessage({ text: msg, type });
         setTimeout(() => setMessage(null), 3000);
     };
 
+    // Generate auto customer key
+    const generateCustomerKey = () => {
+        const timestamp = Date.now();
+        const randomPart = Math.random().toString(36).substr(2, 8);
+        return `cust-${timestamp}-${randomPart}`;
+    };
+
     const resetForm = () => {
-        setCustomerForm({
-            customerType: 'INDIVIDUAL',
-            customerKey: '',
-            primaryEmail: '',
-            primaryPhone: '',
-            legalName: '',
-            displayName: '',
-            legalNumber: '',
-            taxIdentificationNumber: '',
-            logoUrl: '',
-            websiteUrl: '',
-            accountManager: '',
-            firstName: '',
-            middleName: '',
-            lastName: '',
-            dateOfBirth: '',
-            billingEmail: '',
-            timezone: '',
-            language: 'en',
-            currency: 'USD',
-            taxStatus: 1,
-            addressLine1: '',
-            addressLine2: '',
-            city: '',
-            state: '',
-            country: '',
-            zipCode: '',
-            shippingAddressLine1: '',
-            shippingAddressLine2: '',
-            shippingCity: '',
-            shippingState: '',
-            shippingCountry: '',
-            shippingZipCode: ''
-        });
+        setCustomerForm(getEmptyForm());
         setEditingCustomer(null);
+        setIsEditMode(false);
         setCustomerResponse(null);
         setActiveTab('basic');
     };
 
     const openCreateModal = () => {
         resetForm();
+        // Auto-generate customer key for new customers
+        setCustomerForm(prev => ({
+            ...prev,
+            customer_key: generateCustomerKey()
+        }));
         setModalOpen(true);
     };
 
     const openEditModal = (customer) => {
         setEditingCustomer(customer);
-        setCustomerForm({
-            customerType: customer.customerType,
-            customerKey: customer.customerKey,
-            primaryEmail: customer.primaryEmail,
-            primaryPhone: customer.phone || '',
-            firstName: customer.firstName || '',
-            middleName: customer.middleName || '',
-            lastName: customer.lastName || '',
-            dateOfBirth: customer.dateOfBirth || '',
-            legalName: customer.legalName || '',
-            displayName: customer.displayName || '',
-            legalNumber: customer.legalNumber || '',
-            taxIdentificationNumber: customer.taxIdentificationNumber || '',
-            logoUrl: customer.logoUrl || '',
-            websiteUrl: customer.websiteUrl || '',
-            accountManager: customer.accountManager || '',
-            billingEmail: customer.billingEmail || '',
-            timezone: customer.timezone || '',
-            language: customer.language || 'en',
-            currency: customer.currency || 'USD',
-            taxStatus: customer.taxStatus || 1,
-            addressLine1: customer.addressLine1 || '',
-            addressLine2: customer.addressLine2 || '',
-            city: customer.city || '',
-            state: customer.state || '',
-            country: customer.country || '',
-            zipCode: customer.zipCode || '',
-            shippingAddressLine1: customer.shippingAddressLine1 || '',
-            shippingAddressLine2: customer.shippingAddressLine2 || '',
-            shippingCity: customer.shippingCity || '',
-            shippingState: customer.shippingState || '',
-            shippingCountry: customer.shippingCountry || '',
-            shippingZipCode: customer.shippingZipCode || ''
-        });
+        setIsEditMode(true);
+        setCustomerForm(mapCustomerToForm(customer));
         setModalOpen(true);
+        setActiveTab('basic');
     };
 
     const closeModal = () => {
         setModalOpen(false);
+        setTimeout(() => resetForm(), 150); // Small delay for smooth close animation
     };
 
     const handleCustomerInputChange = (e) => {
@@ -191,107 +190,109 @@ const CustomerManagement = () => {
     const copyBillingToShipping = () => {
         setCustomerForm(prev => ({
             ...prev,
-            shippingAddressLine1: prev.addressLine1,
-            shippingAddressLine2: prev.addressLine2,
-            shippingCity: prev.city,
-            shippingState: prev.state,
-            shippingCountry: prev.country,
-            shippingZipCode: prev.zipCode
+            shipping_address_line1: prev.address_line1,
+            shipping_address_line2: prev.address_line2,
+            shipping_city: prev.city,
+            shipping_state: prev.state,
+            shipping_country: prev.country,
+            shipping_zip_code: prev.zip_code
         }));
+    };
+
+    const buildApiPayload = () => {
+        const payload = {
+            customer_key: customerForm.customer_key || `cust-${Date.now()}`,
+            customer_type: customerForm.customer_type,
+            primary_email: customerForm.primary_email,
+        };
+
+        // Add optional fields only if they have values
+        const optionalFields = [
+            'primary_phone', 'legal_name', 'display_name', 'legal_number',
+            'tax_identification_number', 'logo_url', 'website_url', 'account_manager',
+            'first_name', 'middle_name', 'last_name', 'date_of_birth',
+            'billing_email', 'timezone', 'language', 'currency', 'tax_status',
+            'address_line1', 'address_line2', 'city', 'state', 'country', 'zip_code',
+            'shipping_address_line1', 'shipping_address_line2', 'shipping_city',
+            'shipping_state', 'shipping_country', 'shipping_zip_code'
+        ];
+
+        optionalFields.forEach(field => {
+            if (customerForm[field]) {
+                payload[field] = customerForm[field];
+            }
+        });
+
+        return payload;
+    };
+
+    const createNewCustomer = async () => {
+        try {
+            const customerData = buildApiPayload();
+            const response = await createCustomer(customerData);
+
+            console.log("CREATE RESPONSE FROM SDK CALL", response);
+
+            // Map API response to local state format
+            const newCustomer = {
+                id: Date.now(),
+                ...response.data, // API response data
+                metrifoxId: response.data.id,
+                syncStatus: 'synced'
+            };
+
+            setCustomers(prev => [newCustomer, ...prev]);
+            setCustomerResponse(response);
+            showMessage('Customer created and synced successfully!', 'success');
+
+        } catch (error) {
+            console.error('Create customer error:', error);
+            showMessage(`Error creating customer: ${error.message}`, 'error');
+            throw error;
+        }
+    };
+
+    const updateExistingCustomer = async () => {
+        try {
+            const customerData = buildApiPayload();
+            const response = await updateCustomer(customerData);
+
+            console.log("UPDATE RESPONSE FROM SDK CALL", response);
+
+            // Update local customers list with response data
+            setCustomers(prev => prev.map(c =>
+                c.id === editingCustomer.id
+                    ? {
+                        ...c,
+                        ...response.data, // Merge API response
+                        updated_at: new Date().toISOString(),
+                        syncStatus: 'synced'
+                    }
+                    : c
+            ));
+
+            setCustomerResponse(response);
+            showMessage('Customer updated and synced successfully!', 'success');
+
+        } catch (error) {
+            console.error('Update customer error:', error);
+            showMessage(`Error updating customer: ${error.message}`, 'error');
+            throw error;
+        }
     };
 
     const saveCustomer = async () => {
         try {
-            const customerData = {
-                event_name: editingCustomer ? 'customer.updated' : 'customer.created',
-                data: {
-                    customer_key: customerForm.customerKey || `cust-${Date.now()}`,
-                    customer_type: customerForm.customerType,
-                    primary_email: customerForm.primaryEmail,
-                }
-            };
-
-            // Add optional fields only if they have values
-            const optionalFields = {
-                primary_phone: customerForm.primaryPhone,
-                legal_name: customerForm.legalName,
-                display_name: customerForm.displayName,
-                legal_number: customerForm.legalNumber,
-                tax_identification_number: customerForm.taxIdentificationNumber,
-                logo_url: customerForm.logoUrl,
-                website_url: customerForm.websiteUrl,
-                account_manager: customerForm.accountManager,
-                first_name: customerForm.firstName,
-                middle_name: customerForm.middleName,
-                last_name: customerForm.lastName,
-                date_of_birth: customerForm.dateOfBirth,
-                billing_email: customerForm.billingEmail,
-                timezone: customerForm.timezone,
-                language: customerForm.language,
-                currency: customerForm.currency,
-                tax_status: customerForm.taxStatus,
-                address_line1: customerForm.addressLine1,
-                address_line2: customerForm.addressLine2,
-                city: customerForm.city,
-                state: customerForm.state,
-                country: customerForm.country,
-                zip_code: customerForm.zipCode,
-                shipping_address_line1: customerForm.shippingAddressLine1,
-                shipping_address_line2: customerForm.shippingAddressLine2,
-                shipping_city: customerForm.shippingCity,
-                shipping_state: customerForm.shippingState,
-                shipping_country: customerForm.shippingCountry,
-                shipping_zip_code: customerForm.shippingZipCode
-            };
-
-            Object.keys(optionalFields).forEach(key => {
-                if (optionalFields[key]) {
-                    customerData.data[key] = optionalFields[key];
-                }
-            });
-
-            let response;
-            if (editingCustomer) {
-                response = await synchronizeCustomer(customerData);
-                console.log("UPDATE RESPONSE FROM SDK CALL", response);
-
-                // Update in local customers list
-                setCustomers(prev => prev.map(c =>
-                    c.id === editingCustomer.id
-                        ? {
-                            ...c,
-                            ...customerData.data,
-                            phone: customerData.data.primary_phone,
-                            lastSyncedAt: new Date().toISOString(),
-                            metrifoxId: response?.data?.metrifox_id || c.metrifoxId,
-                            syncStatus: 'synced'
-                        }
-                        : c
-                ));
-
-                showMessage('Customer synced successfully!', 'success');
+            if (isEditMode) {
+                await updateExistingCustomer();
             } else {
-                response = await synchronizeCustomer(customerData);
-
-                const newCustomer = {
-                    id: Date.now(),
-                    ...customerData.data,
-                    phone: customerData.data.primary_phone,
-                    metrifoxId: response.data.metrifox_id,
-                    syncStatus: 'synced',
-                    lastSyncedAt: new Date().toISOString()
-                };
-
-                setCustomers(prev => [newCustomer, ...prev]);
-                showMessage('Customer synced successfully!', 'success');
+                await createNewCustomer();
             }
 
-            setCustomerResponse(response);
-            closeModal();
-
+            // Don't close modal immediately so user can see the response
+            // closeModal();
         } catch (error) {
-            console.error(error);
-            showMessage(`Error: ${error.message}`, 'error');
+            // Error is already handled in the respective functions
         }
     };
 
@@ -299,59 +300,56 @@ const CustomerManagement = () => {
         setSyncingCustomer(customer.id);
         try {
             const customerData = {
-                event_name: 'customer.updated',
-                data: {
-                    customer_key: customer.customerKey,
-                    customer_type: customer.customerType,
-                    primary_email: customer.primaryEmail
-                }
+                customer_key: customer.customer_key,
+                customer_type: customer.customer_type,
+                primary_email: customer.primary_email
             };
 
-            if (customer.customerType === 'INDIVIDUAL') {
-                if (customer.firstName) customerData.data.first_name = customer.firstName;
-                if (customer.lastName) customerData.data.last_name = customer.lastName;
+            if (customer.customer_type === 'INDIVIDUAL') {
+                if (customer.first_name) customerData.first_name = customer.first_name;
+                if (customer.last_name) customerData.last_name = customer.last_name;
             } else {
-                if (customer.legalName) customerData.data.legal_name = customer.legalName;
-                if (customer.displayName) customerData.data.display_name = customer.displayName;
+                if (customer.legal_name) customerData.legal_name = customer.legal_name;
+                if (customer.display_name) customerData.display_name = customer.display_name;
             }
 
-            if (customer.phone) customerData.data.primary_phone = customer.phone;
+            if (customer.primary_phone) customerData.primary_phone = customer.primary_phone;
 
-            const response = await synchronizeCustomer(customerData);
+            const response = await updateCustomer(customerData);
 
             setCustomers(prev => prev.map(c =>
                 c.id === customer.id
                     ? {
                         ...c,
-                        lastSyncedAt: new Date().toISOString(),
-                        metrifoxId: response?.data?.metrifox_id,
+                        ...response.data,
+                        updated_at: new Date().toISOString(),
                         syncStatus: 'synced'
                     }
                     : c
             ));
 
-            showMessage(`Customer ${customer.customerKey} synced successfully!`, 'success');
+            showMessage(`Customer ${customer.customer_key} synced successfully!`, 'success');
         } catch (error) {
             console.error(error);
-            showMessage(`Failed to sync customer ${customer.customerKey}`, 'error');
+            showMessage(`Failed to sync customer ${customer.customer_key}: ${error.message}`, 'error');
         } finally {
             setSyncingCustomer(null);
         }
     };
 
     const deleteCustomer = async (customer) => {
-        if (!window.confirm(`Are you sure you want to delete customer "${customer.customerKey}"? This action cannot be undone.`)) {
+        if (!window.confirm(`Are you sure you want to delete customer "${customer.customer_key}"? This action cannot be undone.`)) {
             return;
         }
 
         setDeletingCustomer(customer.id);
         try {
-            await synchronizeCustomer({ event_name: 'customer.deleted', data: { customer_key: customer.customerKey } });
-            setCustomers(prev => prev.filter(c => c.id !== customer.id));
-            showMessage(`Customer ${customer.customerKey} deleted successfully!`, 'success');
+            await SDKDeleteCustomer({ customer_key: customer.customer_key });
+            setCustomers(prev => prev.filter(c => c.customer_key !== customer.customer_key));
+            showMessage(`Customer ${customer.customer_key} deleted successfully!`, 'success');
         } catch (error) {
             console.error(error);
-            showMessage(`Failed to delete customer ${customer.customerKey}`, 'error');
+            showMessage(`Failed to delete customer ${customer.customer_key}: ${error.message}`, 'error');
         } finally {
             setDeletingCustomer(null);
         }
@@ -375,27 +373,31 @@ const CustomerManagement = () => {
     const renderBasicFields = () => (
         <div className="form-section">
             <div className="form-group">
-                <label htmlFor="customerType">Customer Type</label>
+                <label htmlFor="customer_type">Customer Type</label>
                 <select
-                    id="customerType"
-                    name="customerType"
-                    value={customerForm.customerType}
+                    id="customer_type"
+                    name="customer_type"
+                    value={customerForm.customer_type}
                     onChange={handleCustomerInputChange}
                     className="form-select"
+                    disabled={isEditMode}
                 >
                     <option value="INDIVIDUAL">Individual</option>
                     <option value="BUSINESS">Business</option>
                 </select>
+                {isEditMode && (
+                    <small className="form-help">Customer type cannot be changed after creation</small>
+                )}
             </div>
 
             <div className="form-row">
                 <div className="form-group">
-                    <label htmlFor="primaryEmail">Primary Email *</label>
+                    <label htmlFor="primary_email">Primary Email *</label>
                     <input
                         type="email"
-                        id="primaryEmail"
-                        name="primaryEmail"
-                        value={customerForm.primaryEmail}
+                        id="primary_email"
+                        name="primary_email"
+                        value={customerForm.primary_email}
                         onChange={handleCustomerInputChange}
                         className="form-input"
                         placeholder="customer@example.com"
@@ -403,12 +405,12 @@ const CustomerManagement = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="primaryPhone">Primary Phone</label>
+                    <label htmlFor="primary_phone">Primary Phone</label>
                     <input
                         type="tel"
-                        id="primaryPhone"
-                        name="primaryPhone"
-                        value={customerForm.primaryPhone}
+                        id="primary_phone"
+                        name="primary_phone"
+                        value={customerForm.primary_phone}
                         onChange={handleCustomerInputChange}
                         className="form-input"
                         placeholder="+1234567890"
@@ -416,28 +418,28 @@ const CustomerManagement = () => {
                 </div>
             </div>
 
-            {customerForm.customerType === 'INDIVIDUAL' ? (
+            {customerForm.customer_type === 'INDIVIDUAL' ? (
                 <>
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="firstName">First Name</label>
+                            <label htmlFor="first_name">First Name</label>
                             <input
                                 type="text"
-                                id="firstName"
-                                name="firstName"
-                                value={customerForm.firstName}
+                                id="first_name"
+                                name="first_name"
+                                value={customerForm.first_name}
                                 onChange={handleCustomerInputChange}
                                 className="form-input"
                                 placeholder="John"
                             />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="middleName">Middle Name</label>
+                            <label htmlFor="middle_name">Middle Name</label>
                             <input
                                 type="text"
-                                id="middleName"
-                                name="middleName"
-                                value={customerForm.middleName}
+                                id="middle_name"
+                                name="middle_name"
+                                value={customerForm.middle_name}
                                 onChange={handleCustomerInputChange}
                                 className="form-input"
                                 placeholder="William"
@@ -446,24 +448,24 @@ const CustomerManagement = () => {
                     </div>
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="lastName">Last Name</label>
+                            <label htmlFor="last_name">Last Name</label>
                             <input
                                 type="text"
-                                id="lastName"
-                                name="lastName"
-                                value={customerForm.lastName}
+                                id="last_name"
+                                name="last_name"
+                                value={customerForm.last_name}
                                 onChange={handleCustomerInputChange}
                                 className="form-input"
                                 placeholder="Doe"
                             />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="dateOfBirth">Date of Birth</label>
+                            <label htmlFor="date_of_birth">Date of Birth</label>
                             <input
                                 type="date"
-                                id="dateOfBirth"
-                                name="dateOfBirth"
-                                value={customerForm.dateOfBirth}
+                                id="date_of_birth"
+                                name="date_of_birth"
+                                value={customerForm.date_of_birth}
                                 onChange={handleCustomerInputChange}
                                 className="form-input"
                             />
@@ -474,24 +476,24 @@ const CustomerManagement = () => {
                 <>
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="legalName">Legal Name</label>
+                            <label htmlFor="legal_name">Legal Name</label>
                             <input
                                 type="text"
-                                id="legalName"
-                                name="legalName"
-                                value={customerForm.legalName}
+                                id="legal_name"
+                                name="legal_name"
+                                value={customerForm.legal_name}
                                 onChange={handleCustomerInputChange}
                                 className="form-input"
                                 placeholder="Example Business LLC"
                             />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="displayName">Display Name</label>
+                            <label htmlFor="display_name">Display Name</label>
                             <input
                                 type="text"
-                                id="displayName"
-                                name="displayName"
-                                value={customerForm.displayName}
+                                id="display_name"
+                                name="display_name"
+                                value={customerForm.display_name}
                                 onChange={handleCustomerInputChange}
                                 className="form-input"
                                 placeholder="Example Business"
@@ -500,24 +502,24 @@ const CustomerManagement = () => {
                     </div>
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="legalNumber">Legal Number</label>
+                            <label htmlFor="legal_number">Legal Number</label>
                             <input
                                 type="text"
-                                id="legalNumber"
-                                name="legalNumber"
-                                value={customerForm.legalNumber}
+                                id="legal_number"
+                                name="legal_number"
+                                value={customerForm.legal_number}
                                 onChange={handleCustomerInputChange}
                                 className="form-input"
                                 placeholder="ABC123456789"
                             />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="taxIdentificationNumber">Tax ID Number</label>
+                            <label htmlFor="tax_identification_number">Tax ID Number</label>
                             <input
                                 type="text"
-                                id="taxIdentificationNumber"
-                                name="taxIdentificationNumber"
-                                value={customerForm.taxIdentificationNumber}
+                                id="tax_identification_number"
+                                name="tax_identification_number"
+                                value={customerForm.tax_identification_number}
                                 onChange={handleCustomerInputChange}
                                 className="form-input"
                                 placeholder="12-3456789"
@@ -526,24 +528,24 @@ const CustomerManagement = () => {
                     </div>
                     <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="websiteUrl">Website URL</label>
+                            <label htmlFor="website_url">Website URL</label>
                             <input
                                 type="url"
-                                id="websiteUrl"
-                                name="websiteUrl"
-                                value={customerForm.websiteUrl}
+                                id="website_url"
+                                name="website_url"
+                                value={customerForm.website_url}
                                 onChange={handleCustomerInputChange}
                                 className="form-input"
                                 placeholder="https://example.com"
                             />
                         </div>
                         <div className="form-group">
-                            <label htmlFor="accountManager">Account Manager</label>
+                            <label htmlFor="account_manager">Account Manager</label>
                             <input
                                 type="text"
-                                id="accountManager"
-                                name="accountManager"
-                                value={customerForm.accountManager}
+                                id="account_manager"
+                                name="account_manager"
+                                value={customerForm.account_manager}
                                 onChange={handleCustomerInputChange}
                                 className="form-input"
                                 placeholder="John Smith"
@@ -554,19 +556,22 @@ const CustomerManagement = () => {
             )}
 
             <div className="form-group">
-                <label htmlFor="customerKey">
-                    Customer Key {editingCustomer ? '(Read-only)' : '(Optional)'}
+                <label htmlFor="customer_key">
+                    Customer Key (Read-only)
                 </label>
                 <input
                     type="text"
-                    id="customerKey"
-                    name="customerKey"
-                    value={customerForm.customerKey}
+                    id="customer_key"
+                    name="customer_key"
+                    value={customerForm.customer_key}
                     onChange={handleCustomerInputChange}
                     className="form-input"
-                    placeholder={editingCustomer ? customerForm.customerKey : "Leave empty for auto-generation"}
-                    readOnly={!!editingCustomer}
+                    placeholder={customerForm.customer_key}
+                    readOnly={true}
                 />
+                {isEditMode && (
+                    <small className="form-help">Customer key cannot be changed after creation</small>
+                )}
             </div>
         </div>
     );
@@ -574,12 +579,12 @@ const CustomerManagement = () => {
     const renderPreferencesFields = () => (
         <div className="form-section">
             <div className="form-group">
-                <label htmlFor="billingEmail">Billing Email</label>
+                <label htmlFor="billing_email">Billing Email</label>
                 <input
                     type="email"
-                    id="billingEmail"
-                    name="billingEmail"
-                    value={customerForm.billingEmail}
+                    id="billing_email"
+                    name="billing_email"
+                    value={customerForm.billing_email}
                     onChange={handleCustomerInputChange}
                     className="form-input"
                     placeholder="billing@example.com"
@@ -649,17 +654,17 @@ const CustomerManagement = () => {
                     </select>
                 </div>
                 <div className="form-group">
-                    <label htmlFor="taxStatus">Tax Status</label>
+                    <label htmlFor="tax_status">Tax Status</label>
                     <select
-                        id="taxStatus"
-                        name="taxStatus"
-                        value={customerForm.taxStatus}
+                        id="tax_status"
+                        name="tax_status"
+                        value={customerForm.tax_status}
                         onChange={handleCustomerInputChange}
                         className="form-select"
                     >
-                        <option value={1}>Taxable</option>
-                        <option value={0}>Tax Exempt</option>
-                        <option value={2}>Reverse Charge</option>
+                        <option value="REVERSE_CHARGE">Reverse Charge</option>
+                        <option value="TAX_EXEMPT">Tax Exempt</option>
+                        <option value="TAXABLE">Taxable</option>
                     </select>
                 </div>
             </div>
@@ -671,12 +676,12 @@ const CustomerManagement = () => {
             <h4 style={{ margin: '0 0 20px 0', fontSize: '1.1rem', fontWeight: 600 }}>Billing Address</h4>
 
             <div className="form-group">
-                <label htmlFor="addressLine1">Address Line 1</label>
+                <label htmlFor="address_line1">Address Line 1</label>
                 <input
                     type="text"
-                    id="addressLine1"
-                    name="addressLine1"
-                    value={customerForm.addressLine1}
+                    id="address_line1"
+                    name="address_line1"
+                    value={customerForm.address_line1}
                     onChange={handleCustomerInputChange}
                     className="form-input"
                     placeholder="123 Main Street"
@@ -684,12 +689,12 @@ const CustomerManagement = () => {
             </div>
 
             <div className="form-group">
-                <label htmlFor="addressLine2">Address Line 2</label>
+                <label htmlFor="address_line2">Address Line 2</label>
                 <input
                     type="text"
-                    id="addressLine2"
-                    name="addressLine2"
-                    value={customerForm.addressLine2}
+                    id="address_line2"
+                    name="address_line2"
+                    value={customerForm.address_line2}
                     onChange={handleCustomerInputChange}
                     className="form-input"
                     placeholder="Apt 4B, Suite 100"
@@ -737,12 +742,12 @@ const CustomerManagement = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="zipCode">ZIP/Postal Code</label>
+                    <label htmlFor="zip_code">ZIP/Postal Code</label>
                     <input
                         type="text"
-                        id="zipCode"
-                        name="zipCode"
-                        value={customerForm.zipCode}
+                        id="zip_code"
+                        name="zip_code"
+                        value={customerForm.zip_code}
                         onChange={handleCustomerInputChange}
                         className="form-input"
                         placeholder="10001"
@@ -763,12 +768,12 @@ const CustomerManagement = () => {
             </div>
 
             <div className="form-group">
-                <label htmlFor="shippingAddressLine1">Address Line 1</label>
+                <label htmlFor="shipping_address_line1">Address Line 1</label>
                 <input
                     type="text"
-                    id="shippingAddressLine1"
-                    name="shippingAddressLine1"
-                    value={customerForm.shippingAddressLine1}
+                    id="shipping_address_line1"
+                    name="shipping_address_line1"
+                    value={customerForm.shipping_address_line1}
                     onChange={handleCustomerInputChange}
                     className="form-input"
                     placeholder="123 Main Street"
@@ -776,12 +781,12 @@ const CustomerManagement = () => {
             </div>
 
             <div className="form-group">
-                <label htmlFor="shippingAddressLine2">Address Line 2</label>
+                <label htmlFor="shipping_address_line2">Address Line 2</label>
                 <input
                     type="text"
-                    id="shippingAddressLine2"
-                    name="shippingAddressLine2"
-                    value={customerForm.shippingAddressLine2}
+                    id="shipping_address_line2"
+                    name="shipping_address_line2"
+                    value={customerForm.shipping_address_line2}
                     onChange={handleCustomerInputChange}
                     className="form-input"
                     placeholder="Apt 4B, Suite 100"
@@ -790,24 +795,24 @@ const CustomerManagement = () => {
 
             <div className="form-row">
                 <div className="form-group">
-                    <label htmlFor="shippingCity">City</label>
+                    <label htmlFor="shipping_city">City</label>
                     <input
                         type="text"
-                        id="shippingCity"
-                        name="shippingCity"
-                        value={customerForm.shippingCity}
+                        id="shipping_city"
+                        name="shipping_city"
+                        value={customerForm.shipping_city}
                         onChange={handleCustomerInputChange}
                         className="form-input"
                         placeholder="New York"
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="shippingState">State/Province</label>
+                    <label htmlFor="shipping_state">State/Province</label>
                     <input
                         type="text"
-                        id="shippingState"
-                        name="shippingState"
-                        value={customerForm.shippingState}
+                        id="shipping_state"
+                        name="shipping_state"
+                        value={customerForm.shipping_state}
                         onChange={handleCustomerInputChange}
                         className="form-input"
                         placeholder="NY"
@@ -817,24 +822,24 @@ const CustomerManagement = () => {
 
             <div className="form-row">
                 <div className="form-group">
-                    <label htmlFor="shippingCountry">Country</label>
+                    <label htmlFor="shipping_country">Country</label>
                     <input
                         type="text"
-                        id="shippingCountry"
-                        name="shippingCountry"
-                        value={customerForm.shippingCountry}
+                        id="shipping_country"
+                        name="shipping_country"
+                        value={customerForm.shipping_country}
                         onChange={handleCustomerInputChange}
                         className="form-input"
                         placeholder="US"
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="shippingZipCode">ZIP/Postal Code</label>
+                    <label htmlFor="shipping_zip_code">ZIP/Postal Code</label>
                     <input
                         type="text"
-                        id="shippingZipCode"
-                        name="shippingZipCode"
-                        value={customerForm.shippingZipCode}
+                        id="shipping_zip_code"
+                        name="shipping_zip_code"
+                        value={customerForm.shipping_zip_code}
                         onChange={handleCustomerInputChange}
                         className="form-input"
                         placeholder="10001"
@@ -843,8 +848,6 @@ const CustomerManagement = () => {
             </div>
         </div>
     );
-
-    // Update the return statement in CustomerManagement component to use CSS classes instead of Tailwind
 
     return (
         <div className="customer-management">
@@ -858,10 +861,8 @@ const CustomerManagement = () => {
             {/* Header */}
             <div className="page-header">
                 <div className="header-content">
-                    <h1 className="page-title">Customer Management</h1>
-                    <p className="page-subtitle">
-                        Sync your existing customers with Metrifox to enable usage tracking and billing
-                    </p>
+                    <h1>Customer Management</h1>
+                    <p>Sync your existing customers with Metrifox to enable usage tracking and billing</p>
                 </div>
                 <button className="create-customer-btn" onClick={openCreateModal}>
                     <Plus size={20} />
@@ -882,7 +883,7 @@ const CustomerManagement = () => {
                             <div>Type</div>
                             <div>Customer Key</div>
                             <div>Status</div>
-                            <div>Last Synced</div>
+                            <div>Last Updated</div>
                             <div>Actions</div>
                         </div>
 
@@ -890,29 +891,29 @@ const CustomerManagement = () => {
                             <div key={customer.id} className="table-row">
                                 <div className="table-cell customer-info">
                                     <div className="customer-name">
-                                        {customer.customerType === 'INDIVIDUAL'
-                                            ? `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || 'Unnamed'
-                                            : customer.displayName || customer.legalName || 'Unnamed Business'
+                                        {customer.customer_type === 'INDIVIDUAL'
+                                            ? `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'Unnamed'
+                                            : customer.display_name || customer.legal_name || 'Unnamed Business'
                                         }
                                     </div>
-                                    <div className="customer-email">{customer.primaryEmail}</div>
+                                    <div className="customer-email">{customer.primary_email}</div>
                                 </div>
                                 <div className="table-cell">
-                                <span className={`type-badge ${customer.customerType === 'INDIVIDUAL' ? 'type-individual' : 'type-business'}`}>
-                                    {customer.customerType === 'INDIVIDUAL' ? <User size={10} /> : <Building size={10} />}
-                                    {customer.customerType}
-                                </span>
+                                    <span className={`type-badge ${customer.customer_type === 'INDIVIDUAL' ? 'type-individual' : 'type-business'}`}>
+                                        {customer.customer_type === 'INDIVIDUAL' ? <User size={10} /> : <Building size={10} />}
+                                        {customer.customer_type}
+                                    </span>
                                 </div>
                                 <div className="table-cell">
-                                    <div className="customer-key">{customer.customerKey}</div>
+                                    <div className="customer-key">{customer.customer_key}</div>
                                 </div>
                                 <div className="table-cell">
                                     {getStatusBadge(customer.syncStatus)}
                                 </div>
                                 <div className="table-cell">
-                                    <div className="sync-date">{formatDate(customer.lastSyncedAt)}</div>
+                                    <div className="sync-date">{formatDate(customer.updated_at || customer.created_at)}</div>
                                     {customer.metrifoxId && (
-                                        <div className="metrifox-id">{customer.metrifoxId}</div>
+                                        <div className="metrifox-id">ID: {customer.metrifoxId}</div>
                                     )}
                                 </div>
                                 <div className="table-cell actions">
@@ -958,13 +959,13 @@ const CustomerManagement = () => {
                 )}
             </div>
 
-            {/* Modal - continue with CSS classes instead of Tailwind... */}
+            {/* Modal */}
             {modalOpen && (
                 <div className="modal-overlay">
                     <div className="modal-container">
                         <div className="modal-header">
                             <h2 className="modal-title">
-                                {editingCustomer ? 'Update Customer' : 'Create New Customer'}
+                                {isEditMode ? 'Update Customer' : 'Create New Customer'}
                             </h2>
                             <button className="modal-close" onClick={closeModal}>
                                 <X size={24} />
@@ -1009,9 +1010,9 @@ const CustomerManagement = () => {
                             <button
                                 onClick={saveCustomer}
                                 className="save-btn"
-                                disabled={!customerForm.primaryEmail}
+                                disabled={!customerForm.primary_email}
                             >
-                                {editingCustomer ? 'Update' : 'Create'} & Sync
+                                {isEditMode ? 'Update' : 'Create'} & Sync
                             </button>
                         </div>
 
@@ -1020,24 +1021,33 @@ const CustomerManagement = () => {
                             <div className="response-section">
                                 <h3 className="section-title">API Response</h3>
                                 <div className="response-box">
-                                    <div><strong>Status:</strong> {customerResponse.statusCode}</div>
-                                    <div><strong>Message:</strong> {customerResponse.message}</div>
+                                    <div><strong>Status:</strong> {customerResponse.statusCode || 'Success'}</div>
+                                    <div><strong>Message:</strong> {customerResponse.message || 'Operation completed successfully'}</div>
                                     {customerResponse.data && (
                                         <>
-                                            {customerResponse.data.metrifox_id && (
-                                                <div><strong>Metrifox ID:</strong> {customerResponse.data.metrifox_id}</div>
+                                            {customerResponse.data.id && (
+                                                <div><strong>Metrifox ID:</strong> {customerResponse.data.id}</div>
                                             )}
                                             {customerResponse.data.customer_key && (
                                                 <div><strong>Customer Key:</strong> {customerResponse.data.customer_key}</div>
                                             )}
-                                            {customerResponse.data.last_synced_at && (
-                                                <div><strong>Synced At:</strong> {formatDate(customerResponse.data.last_synced_at)}</div>
+                                            {customerResponse.data.updated_at && (
+                                                <div><strong>Last Updated:</strong> {formatDate(customerResponse.data.updated_at)}</div>
                                             )}
                                         </>
                                     )}
                                     {customerResponse.error && (
                                         <div><strong className="error-text">Error:</strong> <span className="error-text">{customerResponse.error}</span></div>
                                     )}
+                                    <div style={{marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb'}}>
+                                        <button
+                                            className="cancel-btn"
+                                            onClick={closeModal}
+                                            style={{fontSize: '0.75rem', padding: '6px 12px'}}
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         )}

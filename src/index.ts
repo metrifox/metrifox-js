@@ -21,16 +21,24 @@ export function recordUsage(request: any) {
   return getDefaultSDK().recordUsage(request);
 }
 
-export function synchronizeCustomer(request: any) {
-  return getDefaultSDK().syncCustomer(request);
+export function createCustomer(request: any) {
+  return getDefaultSDK().createCustomer(request);
 }
 
-export function embedCheckout(config: any) {
-  return getDefaultSDK().embedCheckout(config);
+export function updateCustomer(request: any) {
+  return getDefaultSDK().updateCustomer(request);
+}
+
+export function deleteCustomer(request: any) {
+  return getDefaultSDK().deleteCustomer(request);
 }
 
 export function uploadCustomersCsv(file: File) {
   return getDefaultSDK().uploadCustomersCsv(file);
+}
+
+export function embedCheckout(config: any) {
+  return getDefaultSDK().embedCheckout(config);
 }
 
 export default MetrifoxSDK;

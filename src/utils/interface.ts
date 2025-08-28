@@ -36,76 +36,130 @@ export interface UsageEventResponse {
   customerKey: string;
 }
 
-type EventType = 'customer.created' | 'customer.updated' | 'customer.deleted';
-
 type CustomerType = 'BUSINESS' | 'INDIVIDUAL';
 
-export interface CustomerSyncRequest {
-  event_name: EventType;
-  data?: {
-    // Core fields
-    customer_key: string;
-    customer_type: CustomerType;
-    primary_email: string;
-    primary_phone?: string;
+export interface CustomerCreateRequest {
+  // Core fields
+  customer_key: string;
+  customer_type: CustomerType;
+  primary_email: string;
+  primary_phone?: string;
 
-    // Business fields
-    legal_name?: string;
-    display_name?: string;
-    legal_number?: string;
-    tax_identification_number?: string;
-    logo_url?: string;
-    website_url?: string;
-    account_manager?: string;
+  // Business fields
+  legal_name?: string;
+  display_name?: string;
+  legal_number?: string;
+  tax_identification_number?: string;
+  logo_url?: string;
+  website_url?: string;
+  account_manager?: string;
 
-    // Individual fields
-    first_name?: string;
-    middle_name?: string;
-    last_name?: string;
-    date_of_birth?: string; // ISO date string format
+  // Individual fields
+  first_name?: string;
+  middle_name?: string;
+  last_name?: string;
+  date_of_birth?: string; // ISO date string format
 
-    // Shared identifiers
-    billing_email?: string;
+  // Shared identifiers
+  billing_email?: string;
 
-    // Preferences
-    timezone?: string;
-    language?: string;
-    currency?: string;
-    tax_status?: number;
+  // Preferences
+  timezone?: string;
+  language?: string;
+  currency?: string;
+  tax_status?: number;
 
-    // Address fields
-    address_line1?: string;
-    address_line2?: string;
-    city?: string;
-    state?: string;
-    country?: string;
-    zip_code?: string;
+  // Address fields
+  address_line1?: string;
+  address_line2?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zip_code?: string;
 
-    // Shipping address fields
-    shipping_address_line1?: string;
-    shipping_address_line2?: string;
-    shipping_city?: string;
-    shipping_state?: string;
-    shipping_country?: string;
-    shipping_zip_code?: string;
+  // Shipping address fields
+  shipping_address_line1?: string;
+  shipping_address_line2?: string;
+  shipping_city?: string;
+  shipping_state?: string;
+  shipping_country?: string;
+  shipping_zip_code?: string;
 
-    // Complex JSON fields
-    billing_configuration?: Record<string, any>;
-    tax_identifications?: Array<Record<string, any>>;
-    contact_people?: Array<Record<string, any>>;
-    payment_terms?: Record<string, any>;
-    metadata?: Record<string, any>;
-  };
+  // Complex JSON fields
+  billing_configuration?: Record<string, any>;
+  tax_identifications?: Array<Record<string, any>>;
+  contact_people?: Array<Record<string, any>>;
+  payment_terms?: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+
+export interface CustomerUpdateRequest {
+  // Core fields
+  customer_key: string;
+  customer_type: CustomerType;
+  primary_email: string;
+  primary_phone?: string;
+
+  // Business fields
+  legal_name?: string;
+  display_name?: string;
+  legal_number?: string;
+  tax_identification_number?: string;
+  logo_url?: string;
+  website_url?: string;
+  account_manager?: string;
+
+  // Individual fields
+  first_name?: string;
+  middle_name?: string;
+  last_name?: string;
+  date_of_birth?: string; // ISO date string format
+
+  // Shared identifiers
+  billing_email?: string;
+
+  // Preferences
+  timezone?: string;
+  language?: string;
+  currency?: string;
+  tax_status?: number;
+
+  // Address fields
+  address_line1?: string;
+  address_line2?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zip_code?: string;
+
+  // Shipping address fields
+  shipping_address_line1?: string;
+  shipping_address_line2?: string;
+  shipping_city?: string;
+  shipping_state?: string;
+  shipping_country?: string;
+  shipping_zip_code?: string;
+
+  // Complex JSON fields
+  billing_configuration?: Record<string, any>;
+  tax_identifications?: Array<Record<string, any>>;
+  contact_people?: Array<Record<string, any>>;
+  payment_terms?: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+
+export interface CustomerDeleteRequest {
+  customer_key: string;
+}
+
+export interface CustomerViewRequest {
+  customer_key: string;
 }
 
 export interface CustomerSyncResponse {
   statusCode: number;
   message?: string;
-  data: {
-    last_synced_at: string;
-    metrifox_id: string;
-    customer_key: string;
-  }
+  data: any;
   errors?: any;
   meta?: any;
 }

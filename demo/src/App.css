@@ -457,8 +457,7 @@ body {
   }
 }
 
-/* Add to App.css */
-
+/* CSV Upload Styles */
 .csv-upload-container {
   max-width: 800px;
   margin: 0 auto;
@@ -644,24 +643,7 @@ body {
   font-size: 14px;
 }
 
-@media (max-width: 768px) {
-  .upload-actions {
-    flex-direction: column;
-  }
-
-  .results-summary {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .failed-item, .success-item {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-}
-
-/*CUSTOMER MANAGEMENT*/
-
+/* Customer Management Styles */
 .customer-management {
   max-width: 1200px;
   margin: 0 auto;
@@ -825,8 +807,8 @@ body {
   color: #7b1fa2;
 }
 
-/* Customer Key */
-.customer-key {
+/* Customer Key Table */
+.table-cell .customer-key {
   font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
   font-size: 12px;
   background: #fafafa;
@@ -1015,6 +997,39 @@ body {
   padding: 32px;
 }
 
+/* Tab Navigation in Modal */
+.modal-body .tab-navigation {
+  display: flex;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fafafa;
+  margin: -32px -32px 32px -32px;
+  gap: 0;
+}
+
+.modal-body .tab-button {
+  padding: 16px 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 500;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  position: static;
+}
+
+.modal-body .tab-button:hover {
+  color: #1a1a1a;
+  background: #f3f4f6;
+}
+
+.modal-body .tab-button.active {
+  color: #0f0f0f;
+  border-bottom-color: #0f0f0f;
+  background: white;
+}
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -1063,48 +1078,17 @@ body {
   cursor: not-allowed;
 }
 
-/* Form Styles */
-.customer-form {
+/* Form Section */
+.form-section {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.form-group label {
-  font-weight: 500;
-  color: #1a1a1a;
-  font-size: 14px;
-}
-
-.form-input, .form-select {
-  padding: 12px 16px;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  background: white;
-}
-
-.form-input:focus, .form-select:focus {
-  outline: none;
-  border-color: #0f0f0f;
-  box-shadow: 0 0 0 3px rgba(15, 15, 15, 0.1);
-}
-
-.form-input::placeholder {
-  color: #999;
+.form-help {
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
 }
 
 .form-input[readonly] {
@@ -1112,11 +1096,7 @@ body {
   color: #666;
 }
 
-.form-select {
-  cursor: pointer;
-}
-
-/* Response Section */
+/* Response Section in Modal */
 .response-section {
   margin: 24px 32px 0;
   padding: 24px;
@@ -1125,14 +1105,14 @@ body {
   border: 1px solid #e5e5e5;
 }
 
-.section-title {
+.response-section .section-title {
   font-size: 1.1rem;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0 0 16px 0;
 }
 
-.response-box {
+.response-section .response-box {
   background: white;
   border: 1px solid #e5e5e5;
   border-radius: 8px;
@@ -1142,18 +1122,18 @@ body {
   line-height: 1.6;
 }
 
-.response-box div {
+.response-section .response-box div {
   margin-bottom: 12px;
   display: flex;
   align-items: flex-start;
   gap: 8px;
 }
 
-.response-box div:last-child {
+.response-section .response-box div:last-child {
   margin-bottom: 0;
 }
 
-.response-box strong {
+.response-section .response-box strong {
   font-weight: 600;
   color: #1a1a1a;
   min-width: 120px;
@@ -1162,54 +1142,6 @@ body {
 
 .error-text {
   color: #dc2626;
-}
-
-/* Toast */
-.toast {
-  position: fixed;
-  top: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 16px 24px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  z-index: 1001;
-  animation: slideInFromTop 0.4s ease-out;
-  font-weight: 500;
-  font-size: 14px;
-  max-width: 500px;
-  text-align: center;
-  word-break: break-word;
-}
-
-.toast.success {
-  background-color: #d1fae5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
-}
-
-.toast.error {
-  background-color: #fee2e2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
-  font-weight: 600;
-}
-
-.toast.info {
-  background-color: #e0f2fe;
-  color: #0277bd;
-  border: 1px solid #81d4fa;
-}
-
-@keyframes slideInFromTop {
-  from {
-    transform: translateY(-100%) translateX(-50%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0) translateX(-50%);
-    opacity: 1;
-  }
 }
 
 /* Responsive Design */

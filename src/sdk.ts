@@ -6,14 +6,19 @@ import {
   UsageEventResponse,
   EmbedConfig,
   CustomerSyncResponse,
-  CustomerSyncRequest, CustomerCSVSyncResponse
+  CustomerCSVSyncResponse,
+  CustomerCreateRequest,
+  CustomerUpdateRequest,
+  CustomerDeleteRequest
 } from "./utils/interface";
 import {
   fetchAccess,
   fetchUsage,
   fetchCheckoutKey,
-  synchronizeCustomer,
-    uploadCustomersCsv
+  uploadCustomersCsv,
+  customerCreateRequest,
+  customerUpdateRequest,
+  customerDeleteRequest
 } from "./utils/api";
 import { createIframe } from "./utils/embed-iframe";
 
@@ -72,8 +77,16 @@ export class MetrifoxSDK {
     );
   }
 
-  syncCustomer(request: CustomerSyncRequest): Promise<CustomerSyncResponse> {
-    return synchronizeCustomer(this.baseUrl, this.apiKey, request);
+  createCustomer(request: CustomerCreateRequest): Promise<CustomerSyncResponse> {
+    return customerCreateRequest(this.baseUrl, this.apiKey, request);
+  }
+
+  updateCustomer(request: CustomerUpdateRequest): Promise<CustomerSyncResponse> {
+    return customerUpdateRequest(this.baseUrl, this.apiKey, request);
+  }
+
+  deleteCustomer(request: CustomerDeleteRequest): Promise<CustomerSyncResponse> {
+    return customerDeleteRequest(this.baseUrl, this.apiKey, request);
   }
 
   uploadCustomersCsv(file: File): Promise<CustomerCSVSyncResponse> {

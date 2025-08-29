@@ -5,7 +5,7 @@ import {
   UsageEventRequest,
   UsageEventResponse,
   EmbedConfig,
-  CustomerSyncResponse,
+  APIResponse,
   CustomerCSVSyncResponse,
   CustomerCreateRequest,
   CustomerUpdateRequest,
@@ -77,15 +77,15 @@ export class MetrifoxSDK {
     );
   }
 
-  createCustomer(request: CustomerCreateRequest): Promise<CustomerSyncResponse> {
+  createCustomer(request: CustomerCreateRequest): Promise<APIResponse> {
     return customerCreateRequest(this.baseUrl, this.apiKey, request);
   }
 
-  updateCustomer(request: CustomerUpdateRequest): Promise<CustomerSyncResponse> {
+  updateCustomer(request: CustomerUpdateRequest): Promise<APIResponse> {
     return customerUpdateRequest(this.baseUrl, this.apiKey, request);
   }
 
-  deleteCustomer(request: CustomerDeleteRequest): Promise<CustomerSyncResponse> {
+  deleteCustomer(request: CustomerDeleteRequest): Promise<APIResponse> {
     return customerDeleteRequest(this.baseUrl, this.apiKey, request);
   }
 

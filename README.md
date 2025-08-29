@@ -143,6 +143,32 @@ async function useFeature(customerKey, featureKey, eventName) {
 }
 ```
 
+### Customer Management
+
+```javascript
+import { createCustomer, updateCustomer, deleteCustomer, uploadCustomersCsv } from "metrifox-js";
+// Simple usage (amount = 1)
+customerData = {
+    customer_key: 'your_customer_unique_id',
+    primary_email: 'customer_email@example.com',
+    ...other_fields // See our documentation or types below
+}
+// Create a customer
+const response = await createCustomer(customerData);
+
+// Update a customer
+const response = await updateCustomer(customerData);
+
+deleteRequestParams = {
+    customer_key: 'your_customer_unique_id'
+}
+// Delete a customer
+const response = await deleteCustomer(deleteRequestParams);
+
+// Upload customers list in CSV
+const response = await uploadCustomersCsv(csv_file); // See docs for downloadable sample csv
+```
+
 ## Framework Integration
 
 The usage is identical across all frameworks. Only initialization differs:
@@ -197,7 +223,7 @@ const { checkAccess, recordUsage } = require("metrifox-js");
 app.get("/api/premium/:customerId", async (req, res) => {
   const access = await checkAccess({
     featureKey: "premium_api",
-    customerKey: req.params.customerKey,
+    customerKey: req.params.customerId,
   });
 
   if (!access.can_access) {
@@ -205,7 +231,7 @@ app.get("/api/premium/:customerId", async (req, res) => {
   }
 
   await recordUsage({
-    customerKey: req.params.customerKey,
+    customerKey: req.params.customerId,
     eventName: "premium_api_call",
   });
 
@@ -220,6 +246,11 @@ app.get("/api/premium/:customerId", async (req, res) => {
 - `init(config?)` - Initialize the SDK with configuration
 - `checkAccess(request)` - Check feature access for a customer
 - `recordUsage(request)` - Record a usage event
+- `createCustomer(request)` - Add a customer
+- `updateCustomer(request)` - Update a customer
+- `deleteCustomer(request)` - Delete a customer
+- `uploadCustomersCsv(file)` - Upload a CSV list of customers
+
 
 ### Types
 
@@ -248,6 +279,206 @@ interface AccessResponse {
   included_usage: number;
   unlimited: boolean;
   carryover_quantity: number;
+}
+
+export enum TaxStatus {
+    TAXABLE = "TAXABLE",
+    TAX_EXEMPT = "TAX_EXEMPT",
+    REVERSE_CHARGE = "REVERSE_CHARGE"
+}
+
+// Utility DTOs
+export interface EmailAddress {
+    email: string;
+    is_primary?: boolean;
+}
+
+export interface PhoneNumber {
+    phone_number: string;
+    country_code: string;
+    is_primary?: boolean;
+}
+
+export interface Address {
+    country?: string;
+    address_line_one?: string;
+    address_line_two?: string;
+    city?: string;
+    state?: string;
+    zip_code?: string;
+    phone_number?: string;
+}
+
+export interface BillingConfig {
+    preferred_payment_gateway?: string;
+    preferred_payment_method?: string;
+    billing_email?: string;
+    billing_address?: string;
+    payment_reminder_days?: number;
+}
+
+export interface TaxIdentification {
+    type: string;
+    number: string;
+    country?: string;
+}
+
+export interface ContactPerson {
+    first_name?: string;
+    last_name?: string;
+    email_address?: string;
+    designation?: string;
+    department?: string;
+    is_primary?: boolean;
+    phone_number?: string;
+}
+
+export interface PaymentTerm {
+    type: string;
+    value: string;
+}
+
+
+type CustomerType = 'BUSINESS' | 'INDIVIDUAL';
+
+export interface CustomerCreateRequest {
+    // Core fields
+    customer_key: string; // required field
+    customer_type: CustomerType;
+    primary_email: string; // required field
+    primary_phone?: string;
+
+    // Business fields
+    legal_name?: string;
+    display_name?: string;
+    legal_number?: string;
+    tax_identification_number?: string;
+    logo_url?: string;
+    website_url?: string;
+    account_manager?: string;
+
+    // Individual fields
+    first_name?: string;
+    middle_name?: string;
+    last_name?: string;
+    date_of_birth?: string; // ISO date string format
+    billing_email?: string;
+
+    // Preferences
+    timezone?: string;
+    language?: string;
+    currency?: string;
+    tax_status?: string;
+
+    // Address fields
+    address_line1?: string;
+    address_line2?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    zip_code?: string;
+
+    // Shipping address fields
+    shipping_address_line1?: string;
+    shipping_address_line2?: string;
+    shipping_city?: string;
+    shipping_state?: string;
+    shipping_country?: string;
+    shipping_zip_code?: string;
+
+    // Complex JSON fields
+    billing_configuration?: BillingConfig;
+    tax_identifications?: Array<TaxIdentification>;
+    contact_people?: Array<ContactPerson>;
+    payment_terms?: Array<PaymentTerm>;
+    metadata?: Record<string, any>;
+}
+
+export interface CustomerUpdateRequest {
+    // Core fields
+    customer_key: string; // required field
+    customer_type?: CustomerType;
+    primary_email?: string;
+    primary_phone?: string;
+    billing_email?: string;
+    // Business fields
+    legal_name?: string;
+    display_name?: string;
+    legal_number?: string;
+    tax_identification_number?: string;
+    logo_url?: string;
+    website_url?: string;
+    account_manager?: string;
+
+    // Individual fields
+    first_name?: string;
+    middle_name?: string;
+    last_name?: string;
+    date_of_birth?: string; // ISO date string format
+
+    // Preferences
+    timezone?: string;
+    language?: string;
+    currency?: string;
+    tax_status?: string;
+
+    // Address fields
+    address_line1?: string;
+    address_line2?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    zip_code?: string;
+
+    // Shipping address fields
+    shipping_address_line1?: string;
+    shipping_address_line2?: string;
+    shipping_city?: string;
+    shipping_state?: string;
+    shipping_country?: string;
+    shipping_zip_code?: string;
+
+    // Complex JSON fields 
+    billing_configuration?: BillingConfig;
+    tax_identifications?: Array<TaxIdentification>;
+    contact_people?: Array<ContactPerson>;
+    payment_terms?: Array<PaymentTerm>;
+    metadata?: Record<string, any>;
+}
+
+export interface CustomerDeleteRequest {
+    customer_key: string;
+}
+
+
+export interface CustomerCSVSyncResponse {
+    statusCode: number;
+    message?: string;
+    data: {
+        total_customers: number;
+        successful_upload_count: number;
+        failed_upload_count: number;
+        customers_added: Array<{
+            row: number;
+            customer_key: string;
+            data: any;
+        }>;
+        customers_failed: Array<{
+            row: number;
+            customer_key: string;
+            error: string;
+        }>;
+    }
+    errors?: any;
+    meta?: any;
+}
+
+export interface APIResponse {
+    statusCode: number;
+    message?: string;
+    data?: any;
+    errors?: any;
+    meta?: any;
 }
 ```
 

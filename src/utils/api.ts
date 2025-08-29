@@ -4,7 +4,7 @@ import {
   CustomerCreateRequest,
   CustomerCSVSyncResponse,
   CustomerDeleteRequest,
-  CustomerSyncResponse,
+  APIResponse,
   CustomerUpdateRequest,
   UsageEventRequest,
   UsageEventResponse,
@@ -87,7 +87,7 @@ export async function customerCreateRequest(
     baseUrl: string,
     apiKey: string,
     request: CustomerCreateRequest
-): Promise<CustomerSyncResponse> {
+): Promise<APIResponse> {
   try {
     const url = new URL("/api/v1/customers/new", baseUrl);
     const response = await fetch(url.toString(), {
@@ -109,7 +109,7 @@ export async function customerUpdateRequest(
     baseUrl: string,
     apiKey: string,
     request: CustomerUpdateRequest
-): Promise<CustomerSyncResponse> {
+): Promise<APIResponse> {
   try {
     const url = new URL(`/api/v1/customers/${request.customer_key}`, baseUrl);
     const response = await fetch(url.toString(), {
@@ -131,7 +131,7 @@ export async function customerDeleteRequest(
     baseUrl: string,
     apiKey: string,
     request: CustomerDeleteRequest
-): Promise<CustomerSyncResponse> {
+): Promise<APIResponse> {
   try {
     const url = new URL(`/api/v1/customers/${request.customer_key}`, baseUrl);
     console.log("URL", url)

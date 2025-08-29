@@ -175,6 +175,14 @@ export interface CustomerCSVSyncResponse {
   meta?: any;
 }
 
+export interface APIResponse {
+  statusCode: number;
+  message?: string;
+  data?: any;
+  errors?: any;
+  meta?: any;
+}
+
 export interface EmbedConfig {
   container: string | HTMLElement;
   productKey: string;

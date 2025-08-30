@@ -157,7 +157,12 @@ customerData = {
 const response = await createCustomer(customerData);
 
 // Update a customer
-const response = await updateCustomer(customerData);
+currentCustomerKey = 'existing_customer_key'
+editPayload = {
+    customer_key: "new_customer_key_to_update", // You can update the customer key in case of mistakes
+    primary_email: "new_email@example.com"
+}
+const response = await updateCustomer(currentCustomerKey, editPayload);
 
 deleteRequestParams = {
     customer_key: 'your_customer_unique_id'
@@ -247,7 +252,7 @@ app.get("/api/premium/:customerId", async (req, res) => {
 - `checkAccess(request)` - Check feature access for a customer
 - `recordUsage(request)` - Record a usage event
 - `createCustomer(request)` - Add a customer
-- `updateCustomer(request)` - Update a customer
+- `updateCustomer(customerKey, request)` - Update a customer
 - `deleteCustomer(request)` - Delete a customer
 - `uploadCustomersCsv(file)` - Upload a CSV list of customers
 

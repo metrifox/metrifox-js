@@ -5,11 +5,20 @@ import {
   UsageEventRequest,
   UsageEventResponse,
   EmbedConfig,
+  APIResponse,
+  CustomerCSVSyncResponse,
+  CustomerCreateRequest,
+  CustomerUpdateRequest,
+  CustomerDeleteRequest, CustomerGetRequest
 } from "./utils/interface";
 import {
   fetchAccess,
   fetchUsage,
   fetchCheckoutKey,
+  uploadCustomersCsv,
+  customerCreateRequest,
+  customerUpdateRequest,
+  customerDeleteRequest, customerGetRequest
 } from "./utils/api";
 import { createIframe } from "./utils/embed-iframe";
 
@@ -66,6 +75,27 @@ export class MetrifoxSDK {
       config.container,
       `${this.webBaseUrl}/${checkoutKey}/product/${config.productKey}?iframe-embed=true`
     );
+  }
+
+  createCustomer(request: CustomerCreateRequest): Promise<APIResponse> {
+    return customerCreateRequest(this.baseUrl, this.apiKey, request);
+  }
+
+  updateCustomer(customerKey: string, request: CustomerUpdateRequest): Promise<APIResponse> {
+    return customerUpdateRequest(this.baseUrl, this.apiKey, customerKey, request);
+  }
+
+  getCustomer(request: CustomerGetRequest): Promise<APIResponse> {
+    return customerGetRequest(this.baseUrl, this.apiKey, request);
+  }
+
+  deleteCustomer(request: CustomerDeleteRequest): Promise<APIResponse> {
+    return customerDeleteRequest(this.baseUrl, this.apiKey, request);
+  }
+
+
+  uploadCustomersCsv(file: File): Promise<CustomerCSVSyncResponse> {
+    return uploadCustomersCsv(this.baseUrl, this.apiKey, file);
   }
 
   setApiKey(apiKey: string) {

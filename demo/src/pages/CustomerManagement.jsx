@@ -231,8 +231,6 @@ const CustomerManagement = () => {
             const customerData = buildApiPayload();
             const response = await createCustomer(customerData);
 
-            console.log("CREATE RESPONSE FROM SDK CALL", response);
-
             // Map API response to local state format
             const newCustomer = {
                 id: Date.now(),
@@ -256,8 +254,6 @@ const CustomerManagement = () => {
         try {
             const customerData = buildApiPayload();
             const response = await updateCustomer(customerData);
-
-            console.log("UPDATE RESPONSE FROM SDK CALL", response);
 
             // Update local customers list with response data
             setCustomers(prev => prev.map(c =>

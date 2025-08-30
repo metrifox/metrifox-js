@@ -9,7 +9,7 @@ import {
   CustomerCSVSyncResponse,
   CustomerCreateRequest,
   CustomerUpdateRequest,
-  CustomerDeleteRequest
+  CustomerDeleteRequest, CustomerGetRequest
 } from "./utils/interface";
 import {
   fetchAccess,
@@ -18,7 +18,7 @@ import {
   uploadCustomersCsv,
   customerCreateRequest,
   customerUpdateRequest,
-  customerDeleteRequest
+  customerDeleteRequest, customerGetRequest
 } from "./utils/api";
 import { createIframe } from "./utils/embed-iframe";
 
@@ -85,9 +85,14 @@ export class MetrifoxSDK {
     return customerUpdateRequest(this.baseUrl, this.apiKey, request);
   }
 
+  getCustomer(request: CustomerGetRequest): Promise<APIResponse> {
+    return customerGetRequest(this.baseUrl, this.apiKey, request);
+  }
+
   deleteCustomer(request: CustomerDeleteRequest): Promise<APIResponse> {
     return customerDeleteRequest(this.baseUrl, this.apiKey, request);
   }
+
 
   uploadCustomersCsv(file: File): Promise<CustomerCSVSyncResponse> {
     return uploadCustomersCsv(this.baseUrl, this.apiKey, file);

@@ -7,7 +7,7 @@ import {
   APIResponse,
   CustomerUpdateRequest,
   UsageEventRequest,
-  UsageEventResponse,
+  UsageEventResponse, CustomerGetRequest,
 } from "./interface";
 
 export async function fetchAccess(
@@ -100,7 +100,6 @@ export async function customerCreateRequest(
 
     return response.json();
   } catch (error) {
-    console.log("ERROR LOGGED", error)
     throw error;
   }
 }
@@ -122,7 +121,6 @@ export async function customerUpdateRequest(
 
     return response.json();
   } catch (error) {
-    console.log("ERROR LOGGED", error)
     throw error;
   }
 }
@@ -134,7 +132,6 @@ export async function customerDeleteRequest(
 ): Promise<APIResponse> {
   try {
     const url = new URL(`/api/v1/customers/${request.customer_key}`, baseUrl);
-    console.log("URL", url)
     const response = await fetch(url.toString(), {
       method: "DELETE",
       headers: { "x-api-key": apiKey, "Content-Type": "application/json" }
@@ -144,10 +141,30 @@ export async function customerDeleteRequest(
 
     return response.json();
   } catch (error) {
-    console.log("ERROR LOGGED", error)
     throw error;
   }
 }
+
+export async function customerGetRequest(
+    baseUrl: string,
+    apiKey: string,
+    request: CustomerGetRequest
+): Promise<APIResponse> {
+  try {
+    const url = new URL(`/api/v1/customers/${request.customer_key}`, baseUrl);
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: { "x-api-key": apiKey, "Content-Type": "application/json" }
+    });
+
+    if (!response.ok) throw new Error("Failed to Fetch Customer");
+
+    return response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
 
 
 export async function uploadCustomersCsv(
@@ -156,7 +173,6 @@ export async function uploadCustomersCsv(
     file: File
 ): Promise<CustomerCSVSyncResponse> {
   const url = new URL("/api/v1/customers/csv-upload", baseUrl);
-
   const formData = new FormData();
   formData.append('csv', file);
 

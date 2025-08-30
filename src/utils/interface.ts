@@ -205,6 +205,10 @@ export interface CustomerDeleteRequest {
   customer_key: string;
 }
 
+export interface CustomerGetRequest {
+  customer_key: string;
+}
+
 
 export interface CustomerCSVSyncResponse {
   statusCode: number;

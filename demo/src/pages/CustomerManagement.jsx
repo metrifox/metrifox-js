@@ -253,7 +253,7 @@ const CustomerManagement = () => {
     const updateExistingCustomer = async () => {
         try {
             const customerData = buildApiPayload();
-            const response = await updateCustomer(customerData);
+            const response = await updateCustomer(customerData.customer_key, customerData);
 
             // Update local customers list with response data
             setCustomers(prev => prev.map(c =>
@@ -311,7 +311,7 @@ const CustomerManagement = () => {
 
             if (customer.primary_phone) customerData.primary_phone = customer.primary_phone;
 
-            const response = await updateCustomer(customerData);
+            const response = await updateCustomer(customer.customer_key, customerData);
 
             setCustomers(prev => prev.map(c =>
                 c.id === customer.id

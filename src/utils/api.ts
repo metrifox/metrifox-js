@@ -107,10 +107,11 @@ export async function customerCreateRequest(
 export async function customerUpdateRequest(
     baseUrl: string,
     apiKey: string,
+    customerKey: string,
     request: CustomerUpdateRequest
 ): Promise<APIResponse> {
   try {
-    const url = new URL(`/api/v1/customers/${request.customer_key}`, baseUrl);
+    const url = new URL(`/api/v1/customers/${customerKey}`, baseUrl);
     const response = await fetch(url.toString(), {
       method: "PATCH",
       headers: { "x-api-key": apiKey, "Content-Type": "application/json" },

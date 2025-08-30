@@ -81,8 +81,8 @@ export class MetrifoxSDK {
     return customerCreateRequest(this.baseUrl, this.apiKey, request);
   }
 
-  updateCustomer(request: CustomerUpdateRequest): Promise<APIResponse> {
-    return customerUpdateRequest(this.baseUrl, this.apiKey, request);
+  updateCustomer(customerKey: string, request: CustomerUpdateRequest): Promise<APIResponse> {
+    return customerUpdateRequest(this.baseUrl, this.apiKey, customerKey, request);
   }
 
   getCustomer(request: CustomerGetRequest): Promise<APIResponse> {

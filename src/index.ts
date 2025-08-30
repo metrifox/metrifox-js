@@ -25,8 +25,8 @@ export function createCustomer(request: any) {
   return getDefaultSDK().createCustomer(request);
 }
 
-export function updateCustomer(request: any) {
-  return getDefaultSDK().updateCustomer(request);
+export function updateCustomer(customerKey: string, request: any) {
+  return getDefaultSDK().updateCustomer(customerKey, request);
 }
 
 export function deleteCustomer(request: any) {

@@ -7,7 +7,7 @@ import {
   APIResponse,
   CustomerUpdateRequest,
   UsageEventRequest,
-  UsageEventResponse, CustomerGetRequest,
+  UsageEventResponse, CustomerGetRequest, CustomerDetailsRequest, CustomerDetailsResponse,
 } from "./interface";
 
 export async function fetchAccess(
@@ -166,7 +166,25 @@ export async function customerGetRequest(
   }
 }
 
+export async function customerDetailsRequest(
+    baseUrl: string,
+    apiKey: string,
+    request: CustomerDetailsRequest
+): Promise<CustomerDetailsResponse> {
+  try {
+    const url = new URL(`/api/v1/customers/${request.customer_key}/details`, baseUrl);
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: { "x-api-key": apiKey, "Content-Type": "application/json" }
+    });
 
+    if (!response.ok) throw new Error("Failed to Fetch Customer Details");
+
+    return response.json();
+  } catch (error) {
+    throw error;
+  }
+}
 
 export async function uploadCustomersCsv(
     baseUrl: string,

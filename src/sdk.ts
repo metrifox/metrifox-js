@@ -93,8 +93,8 @@ export class MetrifoxSDK {
     return customerDeleteRequest(this.baseUrl, this.apiKey, request);
   }
 
-  getCustomerDetails(request: CustomerDetailsRequest): Promise<CustomerDetailsResponse> {
-    return customerDetailsRequest(this.baseUrl, this.apiKey, request);
+  getCustomerDetails(customerKey: string): Promise<CustomerDetailsResponse> {
+    return customerDetailsRequest(this.baseUrl, this.apiKey, customerKey);
   }
 
   uploadCustomersCsv(file: File): Promise<CustomerCSVSyncResponse> {

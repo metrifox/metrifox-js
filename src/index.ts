@@ -33,8 +33,8 @@ export function deleteCustomer(request: any) {
   return getDefaultSDK().deleteCustomer(request);
 }
 
-export function getCustomerDetails(request: any) {
-  return getDefaultSDK().getCustomerDetails(request);
+export function getCustomerDetails(customerKey: string) {
+  return getDefaultSDK().getCustomerDetails(customerKey);
 }
 
 export function uploadCustomersCsv(file: File) {

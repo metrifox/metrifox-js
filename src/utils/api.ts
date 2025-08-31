@@ -169,10 +169,10 @@ export async function customerGetRequest(
 export async function customerDetailsRequest(
     baseUrl: string,
     apiKey: string,
-    request: CustomerDetailsRequest
+    customerKey: string
 ): Promise<CustomerDetailsResponse> {
   try {
-    const url = new URL(`/api/v1/customers/${request.customer_key}/details`, baseUrl);
+    const url = new URL(`/api/v1/customers/${customerKey}/details`, baseUrl);
     const response = await fetch(url.toString(), {
       method: "GET",
       headers: { "x-api-key": apiKey, "Content-Type": "application/json" }

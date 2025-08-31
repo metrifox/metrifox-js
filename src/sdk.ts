@@ -85,12 +85,12 @@ export class MetrifoxSDK {
     return customerUpdateRequest(this.baseUrl, this.apiKey, customerKey, request);
   }
 
-  getCustomer(request: CustomerGetRequest): Promise<APIResponse> {
-    return customerGetRequest(this.baseUrl, this.apiKey, request);
+  getCustomer(customerKey: string): Promise<APIResponse> {
+    return customerGetRequest(this.baseUrl, this.apiKey, customerKey);
   }
 
-  deleteCustomer(request: CustomerDeleteRequest): Promise<APIResponse> {
-    return customerDeleteRequest(this.baseUrl, this.apiKey, request);
+  deleteCustomer(customerKey: string): Promise<APIResponse> {
+    return customerDeleteRequest(this.baseUrl, this.apiKey, customerKey);
   }
 
   getCustomerDetails(customerKey: string): Promise<CustomerDetailsResponse> {

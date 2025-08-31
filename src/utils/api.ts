@@ -129,10 +129,10 @@ export async function customerUpdateRequest(
 export async function customerDeleteRequest(
     baseUrl: string,
     apiKey: string,
-    request: CustomerDeleteRequest
+    customerKey: string
 ): Promise<APIResponse> {
   try {
-    const url = new URL(`/api/v1/customers/${request.customer_key}`, baseUrl);
+    const url = new URL(`/api/v1/customers/${customerKey}`, baseUrl);
     const response = await fetch(url.toString(), {
       method: "DELETE",
       headers: { "x-api-key": apiKey, "Content-Type": "application/json" }
@@ -149,10 +149,10 @@ export async function customerDeleteRequest(
 export async function customerGetRequest(
     baseUrl: string,
     apiKey: string,
-    request: CustomerGetRequest
+    customerKey: string
 ): Promise<APIResponse> {
   try {
-    const url = new URL(`/api/v1/customers/${request.customer_key}`, baseUrl);
+    const url = new URL(`/api/v1/customers/${customerKey}`, baseUrl);
     const response = await fetch(url.toString(), {
       method: "GET",
       headers: { "x-api-key": apiKey, "Content-Type": "application/json" }

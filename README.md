@@ -146,7 +146,7 @@ async function useFeature(customerKey, featureKey, eventName) {
 ### Customer Management
 
 ```javascript
-import { createCustomer, updateCustomer, deleteCustomer, uploadCustomersCsv } from "metrifox-js";
+import { createCustomer, updateCustomer, getCustomer, getCustomerDetails, deleteCustomer, uploadCustomersCsv } from "metrifox-js";
 // Simple usage (amount = 1)
 customerData = {
     customer_key: 'your_customer_unique_id',
@@ -164,11 +164,18 @@ editPayload = {
 }
 const response = await updateCustomer(currentCustomerKey, editPayload);
 
-deleteRequestParams = {
+keyParam = {
     customer_key: 'your_customer_unique_id'
 }
+
 // Delete a customer
-const response = await deleteCustomer(deleteRequestParams);
+const response = await deleteCustomer(keyParam.customer_key);
+
+// Get a customer
+const response = await getCustomer(keyParam.customer_key);
+
+// Get customer details
+const response = await getCustomerDetails(keyParam.customer_key);
 
 // Upload customers list in CSV
 const response = await uploadCustomersCsv(csv_file); // See docs for downloadable sample csv
@@ -306,8 +313,8 @@ export interface PhoneNumber {
 
 export interface Address {
     country?: string;
-    address_line_one?: string;
-    address_line_two?: string;
+    address_line1?: string;
+    address_line2?: string;
     city?: string;
     state?: string;
     zip_code?: string;

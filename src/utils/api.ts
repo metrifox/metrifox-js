@@ -7,7 +7,7 @@ import {
   APIResponse,
   CustomerUpdateRequest,
   UsageEventRequest,
-  UsageEventResponse, CustomerGetRequest,
+  UsageEventResponse, CustomerGetRequest, CustomerDetailsRequest, CustomerDetailsResponse,
 } from "./interface";
 
 export async function fetchAccess(
@@ -129,10 +129,10 @@ export async function customerUpdateRequest(
 export async function customerDeleteRequest(
     baseUrl: string,
     apiKey: string,
-    request: CustomerDeleteRequest
+    customerKey: string
 ): Promise<APIResponse> {
   try {
-    const url = new URL(`/api/v1/customers/${request.customer_key}`, baseUrl);
+    const url = new URL(`/api/v1/customers/${customerKey}`, baseUrl);
     const response = await fetch(url.toString(), {
       method: "DELETE",
       headers: { "x-api-key": apiKey, "Content-Type": "application/json" }
@@ -149,10 +149,10 @@ export async function customerDeleteRequest(
 export async function customerGetRequest(
     baseUrl: string,
     apiKey: string,
-    request: CustomerGetRequest
+    customerKey: string
 ): Promise<APIResponse> {
   try {
-    const url = new URL(`/api/v1/customers/${request.customer_key}`, baseUrl);
+    const url = new URL(`/api/v1/customers/${customerKey}`, baseUrl);
     const response = await fetch(url.toString(), {
       method: "GET",
       headers: { "x-api-key": apiKey, "Content-Type": "application/json" }
@@ -166,7 +166,25 @@ export async function customerGetRequest(
   }
 }
 
+export async function customerDetailsRequest(
+    baseUrl: string,
+    apiKey: string,
+    customerKey: string
+): Promise<CustomerDetailsResponse> {
+  try {
+    const url = new URL(`/api/v1/customers/${customerKey}/details`, baseUrl);
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: { "x-api-key": apiKey, "Content-Type": "application/json" }
+    });
 
+    if (!response.ok) throw new Error("Failed to Fetch Customer Details");
+
+    return response.json();
+  } catch (error) {
+    throw error;
+  }
+}
 
 export async function uploadCustomersCsv(
     baseUrl: string,

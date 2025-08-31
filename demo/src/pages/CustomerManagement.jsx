@@ -340,7 +340,7 @@ const CustomerManagement = () => {
 
         setDeletingCustomer(customer.id);
         try {
-            await SDKDeleteCustomer({ customer_key: customer.customer_key });
+            await SDKDeleteCustomer(customer.customer_key);
             setCustomers(prev => prev.filter(c => c.customer_key !== customer.customer_key));
             showMessage(`Customer ${customer.customer_key} deleted successfully!`, 'success');
         } catch (error) {

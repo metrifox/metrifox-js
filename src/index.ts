@@ -29,8 +29,16 @@ export function updateCustomer(customerKey: string, request: any) {
   return getDefaultSDK().updateCustomer(customerKey, request);
 }
 
-export function deleteCustomer(request: any) {
-  return getDefaultSDK().deleteCustomer(request);
+export function deleteCustomer(customerKey: string) {
+  return getDefaultSDK().deleteCustomer(customerKey);
+}
+
+export function getCustomer(customerKey: string) {
+  return getDefaultSDK().getCustomer(customerKey);
+}
+
+export function getCustomerDetails(customerKey: string) {
+  return getDefaultSDK().getCustomerDetails(customerKey);
 }
 
 export function uploadCustomersCsv(file: File) {

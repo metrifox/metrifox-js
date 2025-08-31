@@ -209,6 +209,60 @@ export interface CustomerGetRequest {
   customer_key: string;
 }
 
+export interface CustomerDetailsRequest {
+  customer_key: string;
+}
+
+export interface CustomerSubscription {
+  id: string;
+  status: string;
+  starts_at: string;
+  ends_at: string | null;
+  renews_at: string;
+  plan_name: string;
+  product_name: string;
+  currency_code: string;
+  created_at: string;
+  next_billing_date: string;
+  next_billing_amount: number;
+  current_billing_period_start: string;
+  current_billing_period_end: string;
+}
+
+export interface CustomerEntitlement {
+  id: string;
+  name: string;
+  used_quantity: number;
+  carryover_quantity: number;
+  quota: string | number; // Can be "unlimited" or a number
+  included_usage: number;
+  reset_interval: string;
+  next_reset_at: string;
+}
+
+export interface CustomerWallet {
+  id: string;
+  name: string;
+  balance: number;
+}
+
+export interface CustomerDetailsData {
+  metrifox_id: string;
+  customer_key: string;
+  subscriptions: CustomerSubscription[];
+  entitlements: CustomerEntitlement[];
+  wallets: CustomerWallet[];
+}
+
+export interface CustomerDetailsResponse {
+  statusCode: number;
+  message: string;
+  meta: Record<string, any>;
+  data: CustomerDetailsData;
+  errors: Record<string, any>;
+}
+
+
 
 export interface CustomerCSVSyncResponse {
   statusCode: number;

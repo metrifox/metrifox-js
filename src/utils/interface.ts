@@ -10,18 +10,18 @@ export interface AccessCheckRequest {
 }
 
 export interface AccessResponse {
-  message: string;
-  canAccess: boolean;
-  customerId: string;
-  featureKey: string;
-  requiredQuantity: number;
-  usedQuantity: number;
-  includedUsage: number;
-  nextResetAt: number;
+  can_access: boolean;
+  customer_key: string;
+  feature_key: string;
+  used_quantity: number;
   quota: number;
-  unlimited: boolean;
-  carryoverQuantity: number;
   balance: number;
+  next_reset_at: number;
+  message: string;
+  required_quantity: number;
+  included_usage: number;
+  unlimited: boolean;
+  carryover_quantity: number;
 }
 
 export interface UsageEventRequest {
@@ -39,7 +39,7 @@ export interface UsageEventResponse {
 export enum TaxStatus {
   TAXABLE = "TAXABLE",
   TAX_EXEMPT = "TAX_EXEMPT",
-  REVERSE_CHARGE = "REVERSE_CHARGE"
+  REVERSE_CHARGE = "REVERSE_CHARGE",
 }
 
 // Utility DTOs
@@ -93,8 +93,7 @@ export interface PaymentTerm {
   value: string;
 }
 
-
-type CustomerType = 'BUSINESS' | 'INDIVIDUAL';
+type CustomerType = "BUSINESS" | "INDIVIDUAL";
 
 export interface CustomerCreateRequest {
   // Core fields
@@ -263,7 +262,6 @@ export interface CustomerDetailsResponse {
 }
 
 
-
 export interface CustomerListItem {
   id: string;
   customer_key: string;
@@ -360,7 +358,7 @@ export interface CustomerCSVSyncResponse {
       customer_key: string;
       error: string;
     }>;
-  }
+  };
   errors?: any;
   meta?: any;
 }

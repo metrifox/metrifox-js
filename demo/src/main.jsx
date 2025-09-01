@@ -5,9 +5,7 @@ import App from './App.jsx'
 
 // Initialize Metrifox SDK once at app startup
 const metrifoxClient = init({
-    apiKey: import.meta.env.VITE_METRIFOX_API_KEY,
-    webAppBaseUrl: import.meta.env.VITE_WEB_BASE_URL,
-    baseUrl: import.meta.env.VITE_API_BASE_URL
+    apiKey: import.meta.env.VITE_METRIFOX_API_KEY
 });
 
 // Make the client available globally

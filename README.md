@@ -98,8 +98,7 @@ const metrifoxClient = init({
 import { init } from "metrifox-js";
 
 const metrifoxClient = init({
-  apiKey: "your_test_api_key",
-  baseUrl: "your_demo_environment_url", // Use our demo environment
+  apiKey: "your_test_api_key"
 });
 ```
 

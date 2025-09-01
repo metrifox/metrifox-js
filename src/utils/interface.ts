@@ -264,6 +264,85 @@ export interface CustomerDetailsResponse {
 
 
 
+export interface CustomerListItem {
+  id: string;
+  customer_key: string;
+  customer_type: "INDIVIDUAL" | "BUSINESS";
+  primary_email: string;
+  primary_phone?: string;
+  legal_name?: string;
+  display_name?: string;
+  legal_number?: string;
+  tax_identification_number?: string;
+  logo_url?: string;
+  website_url?: string;
+  account_manager?: string;
+  first_name?: string;
+  middle_name?: string;
+  last_name?: string;
+  full_name: string;
+  billing_email: string;
+  timezone?: string;
+  language?: string;
+  currency: string;
+  tax_status: string;
+  address_line1?: string;
+  address_line2?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zip_code?: string;
+  shipping_address_line1?: string;
+  shipping_address_line2?: string;
+  shipping_city?: string;
+  shipping_state?: string;
+  shipping_country?: string;
+  shipping_zip_code?: string;
+  created_at: string;
+  updated_at: string;
+  phone_numbers: any[];
+  email_addresses: any[];
+  billing_configuration: {
+    preferred_payment_gateway?: string;
+    preferred_payment_method?: string;
+    billing_email?: string;
+    billing_address?: string;
+    payment_reminder_days?: number;
+  };
+  tax_identifications: any[];
+  contact_people: any[];
+  payment_terms: any[];
+  metadata: Record<string, any>;
+  date_of_birth?: string;
+  documents: any[];
+}
+
+export interface CustomerListRequest {
+  page?: number;
+  per_page?: number;
+  search_term?: string;
+  customer_type?: "INDIVIDUAL" | "BUSINESS";
+  date_created?: string;
+}
+
+export interface CustomerListResponse {
+  statusCode: number;
+  message: string;
+  data: CustomerListItem[];
+  meta: {
+    current_page: number;
+    total_pages: number;
+    total_count: number;
+    limit_value: number;
+    next_page: number | null;
+    prev_page: number | null;
+    "first_page?": boolean;
+    "last_page?": boolean;
+    "out_of_range?": boolean;
+  };
+  errors?: any;
+}
+
 export interface CustomerCSVSyncResponse {
   statusCode: number;
   message?: string;

@@ -307,6 +307,18 @@ Retrieve customer information:
 ```javascript
 const client = window.metrifoxClient;
 
+// Get a list of all customers with pagination and filtering
+const customerList = await client.customers.list({
+  page: 1,
+  per_page: 50,
+  search_term: 'john@example.com', // Optional: search by email or name
+  customer_type: 'INDIVIDUAL', // Optional: filter by type ('INDIVIDUAL' | 'BUSINESS')
+  date_created: '2025-09-01' // Optional: filter by creation date
+});
+
+console.log('Customers:', customerList.data); // Array of customers
+console.log('Pagination:', customerList.meta); // Pagination info
+
 // Get basic customer data
 const customer = await client.customers.get('customer_key_123');
 
@@ -480,6 +492,7 @@ client.checkout    // Embedded checkout
 **Customers Module (`client.customers`):**
 - `create(request)` - Add a customer
 - `update(customerKey, request)` - Update a customer
+- `list(params?)` - Get a paginated list of customers with optional filtering
 - `get(customerKey)` - Get a customer
 - `delete(customerKey)` - Delete a customer
 - `getDetails(customerKey)` - Get detailed customer information

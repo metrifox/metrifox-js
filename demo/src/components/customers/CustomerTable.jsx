@@ -2,6 +2,7 @@ import { Edit2, Trash2, RefreshCw, User, Building, Plus } from 'lucide-react';
 
 const CustomerTable = ({
                            customers,
+                           loading,
                            onEdit,
                            onDelete,
                            onSync,
@@ -26,9 +27,28 @@ const CustomerTable = ({
         return <span className={`status-badge ${config.class}`}>{config.text}</span>;
     };
 
+    if (loading) {
+        return (
+            <div className="customer-list-container">
+                <div className="list-header">
+                    <h2 className="list-title">Loading customers...</h2>
+                </div>
+                <div className="loading-state">
+                    <div className="loading-spinner">
+                        <RefreshCw size={24} className="spinning" />
+                    </div>
+                    <p>Fetching your customers from Metrifox...</p>
+                </div>
+            </div>
+        );
+    }
+
     if (customers.length === 0) {
         return (
             <div className="customer-list-container">
+                <div className="list-header">
+                    <h2 className="list-title">All Customers (0)</h2>
+                </div>
                 <div className="empty-state">
                     <div className="empty-icon">👥</div>
                     <h3>No customers yet</h3>

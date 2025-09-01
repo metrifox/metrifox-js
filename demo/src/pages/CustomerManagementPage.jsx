@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, RefreshCw, X, User, Building } from 'lucide-react';
 import Modal from '../components/common/Modal';
 import CustomerForm from '../components/customers/CustomerForm';
@@ -6,41 +6,16 @@ import CustomerTable from '../components/customers/CustomerTable';
 
 const CustomerManagementPage = () => {
     const [message, setMessage] = useState(null);
-    const [customers, setCustomers] = useState([
-        // Mock data - in real app this would come from your database
-        {
-            id: 1,
-            customer_key: 'cust-70ce1e52',
-            primary_email: 'jane.doe@example.com',
-            customer_type: 'INDIVIDUAL',
-            first_name: 'Jane',
-            last_name: 'Doe',
-            primary_phone: '+1234567890',
-            created_at: '2024-01-15T10:30:00Z',
-            updated_at: '2024-01-15T10:30:00Z',
-            currency: 'USD',
-            language: 'en',
-            tax_status: 'TAXABLE',
-            metrifoxId: 'mf_cust_123',
-            syncStatus: 'synced'
-        },
-        {
-            id: 2,
-            customer_key: 'cust-business-457',
-            primary_email: 'ceo@example-business.com',
-            customer_type: 'BUSINESS',
-            legal_name: 'Example Business LLC',
-            display_name: 'Example Business',
-            primary_phone: '+1987654321',
-            created_at: '2024-01-10T08:15:00Z',
-            updated_at: null,
-            currency: 'USD',
-            language: 'en',
-            tax_status: 'REVERSE_CHARGE',
-            metrifoxId: null,
-            syncStatus: 'pending'
-        }
-    ]);
+    const [customers, setCustomers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [pagination, setPagination] = useState({
+        current_page: 1,
+        limit_value: 50,
+        total_count: 0,
+        total_pages: 0,
+        next_page: null,
+        prev_page: null
+    });
 
     const [modalOpen, setModalOpen] = useState(false);
     const [editingCustomer, setEditingCustomer] = useState(null);
@@ -49,6 +24,55 @@ const CustomerManagementPage = () => {
     const [customerResponse, setCustomerResponse] = useState(null);
     const [syncingCustomer, setSyncingCustomer] = useState(null);
     const [deletingCustomer, setDeletingCustomer] = useState(null);
+
+    // Fetch customers from API
+    const fetchCustomers = async (page = 1, search = '') => {
+        try {
+            setLoading(true);
+            const client = window.metrifoxClient;
+            const response = await client.customers.list({
+                page,
+                per_page: pagination.limit_value,
+                search_term: search || undefined
+            });
+
+            if (response.statusCode === 200) {
+                // Map API response to local format
+                const mappedCustomers = response.data.map(customer => ({
+                    id: customer.id,
+                    customer_key: customer.customer_key,
+                    customer_type: customer.customer_type,
+                    primary_email: customer.primary_email,
+                    primary_phone: customer.primary_phone,
+                    first_name: customer.first_name,
+                    middle_name: customer.middle_name,
+                    last_name: customer.last_name,
+                    legal_name: customer.legal_name,
+                    display_name: customer.display_name,
+                    created_at: customer.created_at,
+                    updated_at: customer.updated_at,
+                    metrifoxId: customer.id, // Use the actual customer ID as metrifox ID
+                    syncStatus: 'synced' // All customers from API are synced
+                }));
+
+                setCustomers(mappedCustomers);
+                setPagination(response.meta);
+                showMessage(`Loaded ${mappedCustomers.length} customers`, 'success');
+            }
+        } catch (error) {
+            console.error('Failed to fetch customers:', error);
+            showMessage(`Failed to load customers: ${error.message}`, 'error');
+            // Fallback to empty array on error
+            setCustomers([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Load customers on component mount
+    useEffect(() => {
+        fetchCustomers();
+    }, []);
     const [activeTab, setActiveTab] = useState('basic');
 
     function getEmptyForm() {
@@ -231,17 +255,11 @@ const CustomerManagementPage = () => {
             const customerData = buildApiPayload();
             const response = await client.customers.create(customerData);
 
-            // Map API response to local state format
-            const newCustomer = {
-                id: Date.now(),
-                ...response.data, // API response data
-                metrifoxId: response.data.id,
-                syncStatus: 'synced'
-            };
-
-            setCustomers(prev => [newCustomer, ...prev]);
             setCustomerResponse(response);
             showMessage('Customer created and synced successfully!', 'success');
+            
+            // Refresh customer list to show the new customer
+            await fetchCustomers();
 
         } catch (error) {
             console.error('Create customer error:', error);
@@ -256,20 +274,11 @@ const CustomerManagementPage = () => {
             const customerData = buildApiPayload();
             const response = await client.customers.update(customerData.customer_key, customerData);
 
-            // Update local customers list with response data
-            setCustomers(prev => prev.map(c =>
-                c.id === editingCustomer.id
-                    ? {
-                        ...c,
-                        ...response.data, // Merge API response
-                        updated_at: new Date().toISOString(),
-                        syncStatus: 'synced'
-                    }
-                    : c
-            ));
-
             setCustomerResponse(response);
             showMessage('Customer updated and synced successfully!', 'success');
+            
+            // Refresh customer list to show updated data
+            await fetchCustomers();
 
         } catch (error) {
             console.error('Update customer error:', error);
@@ -314,18 +323,10 @@ const CustomerManagementPage = () => {
 
             const response = await window.metrifoxClient.customers.update(customer.customer_key, customerData);
 
-            setCustomers(prev => prev.map(c =>
-                c.id === customer.id
-                    ? {
-                        ...c,
-                        ...response.data,
-                        updated_at: new Date().toISOString(),
-                        syncStatus: 'synced'
-                    }
-                    : c
-            ));
-
             showMessage(`Customer ${customer.customer_key} synced successfully!`, 'success');
+            
+            // Refresh customer list to show updated sync status
+            await fetchCustomers();
         } catch (error) {
             console.error(error);
             showMessage(`Failed to sync customer ${customer.customer_key}: ${error.message}`, 'error');
@@ -342,8 +343,10 @@ const CustomerManagementPage = () => {
         setDeletingCustomer(customer.id);
         try {
             await window.metrifoxClient.customers.delete(customer.customer_key);
-            setCustomers(prev => prev.filter(c => c.customer_key !== customer.customer_key));
             showMessage(`Customer ${customer.customer_key} deleted successfully!`, 'success');
+            
+            // Refresh customer list to remove deleted customer
+            await fetchCustomers();
         } catch (error) {
             console.error(error);
             showMessage(`Failed to delete customer ${customer.customer_key}: ${error.message}`, 'error');
@@ -385,6 +388,7 @@ const CustomerManagementPage = () => {
             {/* Customer List */}
             <CustomerTable
                 customers={customers}
+                loading={loading}
                 onEdit={openEditModal}
                 onSync={syncCustomer}
                 onDelete={deleteCustomer}

@@ -642,6 +642,22 @@
     animation: spin 1s linear infinite;
 }
 
+/* Loading state */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+    color: var(--metrifox-gray);
+}
+
+.loading-spinner {
+    margin-bottom: 16px;
+    color: var(--metrifox-primary);
+}
+
 .empty-state {
     text-align: center;
     padding: 80px 40px;

@@ -1,4 +1,4 @@
-import { BaseClient } from "../../core/base-client";
+import { BaseClient } from "../../core/base_client";
 import {
     CustomerCreateRequest,
     CustomerUpdateRequest,

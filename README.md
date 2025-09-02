@@ -136,13 +136,13 @@ const sdk = new MetrifoxSDK({
 });
 
 // Use directly
-const access = await sdk.checkAccess({
+const access = await sdk.usages.checkAccess({
   featureKey: "feature_forms",
   customerKey: "cust-7ec1e51",
 });
 
 if (access.can_access) {
-  await sdk.recordUsage({
+  await sdk.usages.recordUsage({
     customerKey: "cust-7ec1e51",
     eventName: "form.created",
   });

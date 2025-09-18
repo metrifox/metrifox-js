@@ -6,6 +6,7 @@ import FeatureAccessPage from './pages/FeatureAccessPage';
 import CustomerManagementPage from './pages/CustomerManagementPage';
 import CsvUploadPage from './pages/CsvUploadPage';
 import EmbeddedCheckoutPage from './pages/EmbeddedCheckoutPage';
+import MockCustomerSignUp from './pages/MockCustomerSignup';
 import { useToast } from './hooks/useToast';
 
 import './styles/globals.css';
@@ -20,7 +21,8 @@ const App = ({ customerKey, featureKey, eventName }) => {
         { id: 'feature-access', label: 'Feature Access', component: FeatureAccessPage },
         { id: 'customer-management', label: 'Customer Management', component: CustomerManagementPage },
         { id: 'csv-upload', label: 'CSV Upload', component: CsvUploadPage },
-        { id: 'embedded-checkout', label: 'Embedded Checkout', component: EmbeddedCheckoutPage }
+        { id: 'embedded-checkout', label: 'Embedded Checkout', component: EmbeddedCheckoutPage },
+        { id: 'mock-checkout-signup', label: 'Checkout customer signup', component: MockCustomerSignUp }
     ];
 
     const ActiveComponent = navigationItems.find(item => item.id === activeView)?.component || FeatureAccessPage;

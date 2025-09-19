@@ -13,8 +13,6 @@ const metrifoxClient = init({
 // Make the client available globally
 window.metrifoxClient = metrifoxClient;
 
-console.log('key ', import.meta.env.VITE_METRIFOX_API_KEY)
-
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App customerKey="cust-70ce1e51" featureKey="feature_forms" eventName="form.created" />

@@ -405,7 +405,7 @@ If you're configuring your own pricing page, the above example should be suffici
 
 - Set your signup URL in the Checkout section of your dashboard settings.
 - On your signup/login page (the URL configured above), extract the `offering_key` and `billing_interval` query parameters from the URL. These are included when a customer is redirected from the Metrifox checkout page.
-- After verifying the customer, retrieve the `customer_key` and use it along with the extracted parameters to generate a checkout URL.
+- After verifying the customer, retrieve the `customer_key` which is the unique identifier of the customer on your platform, and use it along with the extracted parameters to generate a checkout URL.
 - Redirect the customer to the generated URL so they can complete their order.
 
 ```javascript

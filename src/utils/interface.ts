@@ -261,7 +261,6 @@ export interface CustomerDetailsResponse {
   errors: Record<string, any>;
 }
 
-
 export interface CustomerListItem {
   id: string;
   customer_key: string;
@@ -374,4 +373,10 @@ export interface APIResponse {
 export interface EmbedConfig {
   container: string | HTMLElement;
   productKey: string;
+}
+
+export interface CheckoutConfig {
+  offeringKey: string;
+  billingInterval?: string;
+  customerKey?: string;
 }

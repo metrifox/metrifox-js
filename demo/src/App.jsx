@@ -6,6 +6,7 @@ import FeatureAccessPage from './pages/FeatureAccessPage';
 import CustomerManagementPage from './pages/CustomerManagementPage';
 import CsvUploadPage from './pages/CsvUploadPage';
 import EmbeddedCheckoutPage from './pages/EmbeddedCheckoutPage';
+import CheckoutCustomerSignup from './pages/CheckoutCustomerSignup';
 import { useToast } from './hooks/useToast';
 
 import './styles/globals.css';
@@ -13,14 +14,19 @@ import './styles/components.css';
 import './styles/pages.css';
 
 const App = ({ customerKey, featureKey, eventName }) => {
-    const [activeView, setActiveView] = useState('feature-access');
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const offeringKey = urlParams.get('offering_key');
+
+    const [activeView, setActiveView] = useState(offeringKey ? 'checkout-signup' : 'feature-access');
     const { toast, showToast, hideToast } = useToast();
 
     const navigationItems = [
         { id: 'feature-access', label: 'Feature Access', component: FeatureAccessPage },
         { id: 'customer-management', label: 'Customer Management', component: CustomerManagementPage },
         { id: 'csv-upload', label: 'CSV Upload', component: CsvUploadPage },
-        { id: 'embedded-checkout', label: 'Embedded Checkout', component: EmbeddedCheckoutPage }
+        { id: 'embedded-checkout', label: 'Embedded Checkout', component: EmbeddedCheckoutPage },
+        { id: 'checkout-signup', label: 'Checkout customer signup', component: CheckoutCustomerSignup }
     ];
 
     const ActiveComponent = navigationItems.find(item => item.id === activeView)?.component || FeatureAccessPage;

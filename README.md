@@ -18,8 +18,9 @@ The official JavaScript library for the Metrifox platform. Build and scale usage
   - [Getting Customer Data](#getting-customer-data)
   - [Deleting Customers](#deleting-customers)
   - [Bulk Customer Import (CSV)](#bulk-customer-import-csv)
-- [Embedded Checkout & Billing](#embedded-checkout--billing)
+- [Checkout & Billing](#checkout--billing)
   - [Embed Checkout Pages](#embed-checkout-pages)
+  - [Generate Checkout url](#generate-checkout-url)
 - [Framework Integration](#framework-integration)
   - [React/Vite](#reactvite)
   - [Next.js](#nextjs)
@@ -65,8 +66,8 @@ REACT_APP_METRIFOX_API_KEY=your_api_key_here
 import { init } from "metrifox-js";
 
 // Initialize and store client globally
-const metrifoxClient = init({ 
-  apiKey: import.meta.env.VITE_METRIFOX_API_KEY 
+const metrifoxClient = init({
+  apiKey: import.meta.env.VITE_METRIFOX_API_KEY,
 });
 window.metrifoxClient = metrifoxClient;
 ```
@@ -78,7 +79,7 @@ import { init } from "metrifox-js";
 
 // Store client instance
 const metrifoxClient = init({
-  apiKey: process.env.METRIFOX_API_KEY
+  apiKey: process.env.METRIFOX_API_KEY,
 });
 ```
 
@@ -87,8 +88,8 @@ const metrifoxClient = init({
 ```javascript
 import { init } from "metrifox-js";
 
-const metrifoxClient = init({ 
-  apiKey: "your_api_key_here" 
+const metrifoxClient = init({
+  apiKey: "your_api_key_here",
 });
 ```
 
@@ -98,7 +99,7 @@ const metrifoxClient = init({
 import { init } from "metrifox-js";
 
 const metrifoxClient = init({
-  apiKey: "your_test_api_key"
+  apiKey: "your_test_api_key",
 });
 ```
 
@@ -132,7 +133,7 @@ import { MetrifoxSDK } from "metrifox-js";
 
 // Initialize SDK instance
 const sdk = new MetrifoxSDK({
-  apiKey: "your_api_key_here"
+  apiKey: "your_api_key_here",
 });
 
 // Use directly
@@ -205,29 +206,29 @@ Here's a complete example showing the typical access control + usage recording p
 async function useFeature(metrifoxClient, customerKey, featureKey, eventName) {
   try {
     // 1. Check if customer has access
-    const access = await metrifoxClient.usages.checkAccess({ 
-      featureKey, 
-      customerKey 
+    const access = await metrifoxClient.usages.checkAccess({
+      featureKey,
+      customerKey,
     });
 
     if (access.can_access) {
       // 2. Perform the actual feature logic here
       const result = performFeatureLogic();
-      
+
       // 3. Record usage after successful completion
-      await metrifoxClient.usages.recordUsage({ 
-        customerKey, 
+      await metrifoxClient.usages.recordUsage({
+        customerKey,
         eventName,
-        amount: result.unitsUsed || 1 
+        amount: result.unitsUsed || 1,
       });
-      
+
       return { success: true, data: result };
     } else {
-      return { 
-        success: false, 
-        error: 'Quota exceeded',
+      return {
+        success: false,
+        error: "Quota exceeded",
         balance: access.balance,
-        quota: access.quota 
+        quota: access.quota,
       };
     }
   } catch (error) {
@@ -249,35 +250,35 @@ const client = window.metrifoxClient; // or your stored client instance
 
 // Individual customer
 const individualCustomer = {
-    customer_key: 'user_12345',
-    customer_type: 'INDIVIDUAL',
-    primary_email: 'john.doe@example.com',
-    first_name: 'John',
-    last_name: 'Doe',
-    primary_phone: '+1234567890',
-    // Optional fields
-    billing_email: 'billing@example.com',
-    timezone: 'America/New_York',
-    language: 'en',
-    currency: 'USD'
+  customer_key: "user_12345",
+  customer_type: "INDIVIDUAL",
+  primary_email: "john.doe@example.com",
+  first_name: "John",
+  last_name: "Doe",
+  primary_phone: "+1234567890",
+  // Optional fields
+  billing_email: "billing@example.com",
+  timezone: "America/New_York",
+  language: "en",
+  currency: "USD",
 };
 
 const response = await client.customers.create(individualCustomer);
-console.log('Customer created:', response.data);
+console.log("Customer created:", response.data);
 ```
 
 ```javascript
 // Business customer
 const businessCustomer = {
-    customer_key: 'company_abc123',
-    customer_type: 'BUSINESS',
-    primary_email: 'contact@acmecorp.com',
-    legal_name: 'ACME Corporation LLC',
-    display_name: 'ACME Corp',
-    website_url: 'https://acmecorp.com',
-    // Optional fields
-    account_manager: 'Sarah Johnson',
-    tax_identification_number: '12-3456789'
+  customer_key: "company_abc123",
+  customer_type: "BUSINESS",
+  primary_email: "contact@acmecorp.com",
+  legal_name: "ACME Corporation LLC",
+  display_name: "ACME Corp",
+  website_url: "https://acmecorp.com",
+  // Optional fields
+  account_manager: "Sarah Johnson",
+  tax_identification_number: "12-3456789",
 };
 
 const response = await client.customers.create(businessCustomer);
@@ -291,13 +292,16 @@ Modify existing customer information:
 const client = window.metrifoxClient;
 
 const updates = {
-    customer_key: "updated_customer_key", // Can change the key if needed
-    primary_email: "newemail@example.com",
-    first_name: "Jane", // Update individual fields
-    currency: "EUR" // Change preferences
+  customer_key: "updated_customer_key", // Can change the key if needed
+  primary_email: "newemail@example.com",
+  first_name: "Jane", // Update individual fields
+  currency: "EUR", // Change preferences
 };
 
-const response = await client.customers.update('existing_customer_key', updates);
+const response = await client.customers.update(
+  "existing_customer_key",
+  updates
+);
 ```
 
 ### Getting Customer Data
@@ -311,20 +315,20 @@ const client = window.metrifoxClient;
 const customerList = await client.customers.list({
   page: 1,
   per_page: 50,
-  search_term: 'john@example.com', // Optional: search by email or name
-  customer_type: 'INDIVIDUAL', // Optional: filter by type ('INDIVIDUAL' | 'BUSINESS')
-  date_created: '2025-09-01' // Optional: filter by creation date
+  search_term: "john@example.com", // Optional: search by email or name
+  customer_type: "INDIVIDUAL", // Optional: filter by type ('INDIVIDUAL' | 'BUSINESS')
+  date_created: "2025-09-01", // Optional: filter by creation date
 });
 
-console.log('Customers:', customerList.data); // Array of customers
-console.log('Pagination:', customerList.meta); // Pagination info
+console.log("Customers:", customerList.data); // Array of customers
+console.log("Pagination:", customerList.meta); // Pagination info
 
 // Get basic customer data
-const customer = await client.customers.get('customer_key_123');
+const customer = await client.customers.get("customer_key_123");
 
 // Get detailed customer information (includes usage stats, billing info, etc.)
-const customerDetails = await client.customers.getDetails('customer_key_123');
-console.log('Usage stats:', customerDetails.usage_summary);
+const customerDetails = await client.customers.getDetails("customer_key_123");
+console.log("Usage stats:", customerDetails.usage_summary);
 ```
 
 ### Deleting Customers
@@ -335,7 +339,7 @@ Remove customers from your account:
 const client = window.metrifoxClient;
 
 // Delete customer (this will also remove all their usage history)
-const response = await client.customers.delete('customer_key_to_delete');
+const response = await client.customers.delete("customer_key_to_delete");
 ```
 
 ### Bulk Customer Import (CSV)
@@ -346,7 +350,7 @@ Upload multiple customers at once using a CSV file:
 const client = window.metrifoxClient;
 
 // File input from your form
-const csvFile = document.getElementById('csv-input').files[0];
+const csvFile = document.getElementById("csv-input").files[0];
 
 const response = await client.customers.uploadCsv(csvFile);
 console.log(`Processed ${response.data.total_customers} customers`);
@@ -355,17 +359,19 @@ console.log(`Failed: ${response.data.failed_upload_count}`);
 
 // Handle failed imports
 if (response.data.failed_upload_count > 0) {
-    response.data.customers_failed.forEach(failure => {
-        console.log(`Row ${failure.row}: ${failure.error}`);
-    });
+  response.data.customers_failed.forEach((failure) => {
+    console.log(`Row ${failure.row}: ${failure.error}`);
+  });
 }
 ```
 
-## Embedded Checkout & Billing
+## Checkout & Billing
 
-Embed Metrifox checkout pages directly in your application for seamless billing experiences.
+Configure your checkout experience
 
 ### Embed Checkout Pages
+
+Embed Metrifox checkout pages directly in your application for seamless billing experiences.
 
 ```javascript
 const client = window.metrifoxClient; // or your stored client instance
@@ -380,6 +386,60 @@ await client.checkout.embed({
 // Customers can upgrade/manage billing without leaving your app
 ```
 
+### Generate checkout url
+
+Generate checkout url for your customer.
+
+```javascript
+const client = window.metrifoxClient; // or your stored client instance
+
+// Generate a checkout url
+await client.checkout.url({
+  offeringKey: "your_offering_key", // Key of the offering the customer will purchase
+  billingInterval: "billing_interval", // Billing interval: e.g. "monthly", "yearly", or "quarterly". This is optional for offerings that do not have billing intervals
+  customerKey: "customer_key", // Key of the customer making the purchase
+});
+```
+
+If you're configuring your own pricing page, the above example should be sufficient. However, if you're using Metrifox's pricing page but want to handle customer verification yourself, follow the steps below:
+
+- Set your signup URL in the Checkout section of your dashboard settings.
+- On your signup/login page (the URL configured above), extract the `offering_key` and `billing_interval` query parameters from the URL. These are included when a customer is redirected from the Metrifox checkout page.
+- After verifying the customer, retrieve the `customer_key` which is the unique identifier of the customer on your platform, and use it along with the extracted parameters to generate a checkout URL. (Remember to sync your new customer with Metrifox using `customer.create` from the sdk)
+- Redirect the customer to the generated URL so they can complete their order.
+
+```javascript
+  const client = window.metrifoxClient; // or your stored client instance
+
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const offeringKey = urlParams.get('offering_key');
+  const billingInterval = urlParams.get('billing_interval');
+  //Store the extracted params above if your customer would navigate from the initial url
+
+  const customerSignUp = async () => {
+    try {
+      const customerDetails = await mockCustomerSignUp() //Replace with your actual signup/login function
+
+      if (customerDetails) {
+        const customerKey = customerDetails.customer_key
+        if (offeringKey) {
+          const checkoutUrl = await client.checkout.url({
+            customerKey,
+            offeringKey,
+            billingInterval
+          })
+          window.open(checkoutUrl, "_blank", "noopener,noreferrer") // Open the URL in a new tab or handle as needed
+        }
+      }
+    } catch (error) {
+      // handle error
+    } finally {
+      ...
+    }
+  };
+```
+
 ## Framework Integration
 
 The usage is identical across all frameworks. Only initialization differs:
@@ -391,8 +451,8 @@ The usage is identical across all frameworks. Only initialization differs:
 ```javascript
 import { init } from "metrifox-js";
 
-const metrifoxClient = init({ 
-  apiKey: import.meta.env.VITE_METRIFOX_API_KEY 
+const metrifoxClient = init({
+  apiKey: import.meta.env.VITE_METRIFOX_API_KEY,
 });
 window.metrifoxClient = metrifoxClient;
 ```
@@ -427,8 +487,8 @@ function FeatureButton({ customerKey }) {
 ```javascript
 import { init } from "metrifox-js";
 
-const metrifoxClient = init({ 
-  apiKey: process.env.METRIFOX_API_KEY 
+const metrifoxClient = init({
+  apiKey: process.env.METRIFOX_API_KEY,
 });
 
 // Export for use in other modules
@@ -443,7 +503,7 @@ export { metrifoxClient };
 import { init } from "metrifox-js";
 
 const metrifoxClient = init({
-  apiKey: process.env.METRIFOX_API_KEY
+  apiKey: process.env.METRIFOX_API_KEY,
 });
 
 app.get("/api/premium/:customerId", async (req, res) => {
@@ -475,21 +535,24 @@ The SDK uses a modular client-based architecture:
 const client = init(config);
 
 // Available modules:
-client.usages      // Usage tracking and access control
-client.customers   // Customer management  
-client.checkout    // Embedded checkout
+client.usages; // Usage tracking and access control
+client.customers; // Customer management
+client.checkout; // Embedded checkout
 ```
 
 ### Functions
 
 **Initialization:**
+
 - `init(config?)` - Initialize and return the SDK client
 
 **Usage Module (`client.usages`):**
+
 - `checkAccess(request)` - Check feature access for a customer
 - `recordUsage(request)` - Record a usage event
 
 **Customers Module (`client.customers`):**
+
 - `create(request)` - Add a customer
 - `update(customerKey, request)` - Update a customer
 - `list(params?)` - Get a paginated list of customers with optional filtering
@@ -499,6 +562,7 @@ client.checkout    // Embedded checkout
 - `uploadCsv(file)` - Upload a CSV list of customers
 
 **Checkout Module (`client.checkout`):**
+
 - `embed(config)` - Embed checkout pages in your application
 
 ### Types
@@ -552,7 +616,7 @@ try {
   const access = await client.usages.checkAccess({ featureKey, customerKey });
 } catch (error) {
   // Handle network errors, invalid API key, etc.
-  console.error('Metrifox API error:', error.message);
+  console.error("Metrifox API error:", error.message);
 }
 ```
 

@@ -1,6 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const EmbeddedCheckoutPage = () => {
+    const handleEmbed = async () => {
+        const client = window.metrifoxClient;
+        client.checkout.embed({
+            container: ".checkout-embed",
+            productKey: "product_collabspace_3113" // replace with your product key 
+        });
+    }
+
+    useEffect(() => {
+        handleEmbed()
+    }, [])
+
     return (
         <div className="embedded-checkout-page">
             <div className="checkout-container">

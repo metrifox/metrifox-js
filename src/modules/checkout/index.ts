@@ -18,7 +18,7 @@ export class CheckoutModule extends BaseClient {
 
     createIframe(
       config.container,
-      `${this.webBaseUrl}/${checkoutKey}/product/${config.productKey}?iframe-embed=true`
+      `${this.webBaseUrl}/${checkoutKey}/pricing/${config.productKey}?iframe-embed=true`
     );
   }
 

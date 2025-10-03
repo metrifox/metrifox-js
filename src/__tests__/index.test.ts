@@ -278,7 +278,7 @@ describe("Metrifox SDK", () => {
         statusCode: 200,
         message: "Customer Sync Successful",
         data: {
-          customer_key: "test-custome-key",
+          customer_key: "test-customer-key",
           metrifox_id: "metrifox-id",
           last_synced_at: "2025-08-17T15:49:50+01:00",
         },
@@ -292,7 +292,7 @@ describe("Metrifox SDK", () => {
       });
 
       const result = await client.customers.create({
-        customer_key: "test-custome-key",
+        customer_key: "test-customer-key",
         primary_email: "test_customer@example.com",
         first_name: "Test",
         last_name: "Customer",
@@ -309,7 +309,7 @@ describe("Metrifox SDK", () => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              customer_key: "test-custome-key",
+              customer_key: "test-customer-key",
               primary_email: "test_customer@example.com",
               first_name: "Test",
               last_name: "Customer",
@@ -327,7 +327,7 @@ describe("Metrifox SDK", () => {
         statusCode: 200,
         message: "Customer Sync Successful",
         data: {
-          customer_key: "test-custome-key",
+          customer_key: "test-customer-key",
           metrifox_id: "metrifox-id",
           last_synced_at: "2025-08-17T15:49:50+01:00",
         },
@@ -340,8 +340,8 @@ describe("Metrifox SDK", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await client.customers.update("test-custome-key", {
-        customer_key: "test-custome-key",
+      const result = await client.customers.update("test-customer-key", {
+        customer_key: "test-customer-key",
         primary_email: "updated_test_customer@example.com",
         first_name: "Updated Test",
         last_name: "Updated Customer",
@@ -350,7 +350,7 @@ describe("Metrifox SDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-          "https://api.metrifox.com/api/v1/customers/test-custome-key",
+          "https://api.metrifox.com/api/v1/customers/test-customer-key",
           {
             method: "PATCH",
             headers: {
@@ -358,7 +358,7 @@ describe("Metrifox SDK", () => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              customer_key: "test-custome-key",
+              customer_key: "test-customer-key",
               primary_email: "updated_test_customer@example.com",
               first_name: "Updated Test",
               last_name: "Updated Customer",
@@ -379,8 +379,8 @@ describe("Metrifox SDK", () => {
       });
 
       await expect(
-          client.customers.update("test-custome-key", {
-            customer_key: "test-custome-key",
+          client.customers.update("test-customer-key", {
+            customer_key: "test-customer-key",
             primary_email: "updated_test_customer@example.com",
             first_name: "Updated Test",
             last_name: "Updated Customer",

@@ -1,4 +1,4 @@
-import MetrifoxSDK, { checkAccess, recordUsage, init } from "../index";
+import { init, MetrifoxClient } from "../index";
 
 // Type declaration for Jest globals
 declare var global: any;
@@ -6,31 +6,33 @@ declare var global: any;
 // Mock fetch globally
 global.fetch = jest.fn();
 
-describe("MetrifoxSDK", () => {
+describe("Metrifox SDK", () => {
+  let client: MetrifoxClient;
+
   beforeEach(() => {
     (fetch as jest.Mock).mockClear();
+    client = init({ apiKey: "test-key" });
   });
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  describe("constructor", () => {
-    it("should create instance with API key", () => {
-      const sdk = new MetrifoxSDK({ apiKey: "test-key" });
-      expect(sdk).toBeInstanceOf(MetrifoxSDK);
-    });
-
-    it("should throw error when no API key provided", () => {
-      expect(() => new MetrifoxSDK()).toThrow("API key required");
+  describe("initialization", () => {
+    it("should create client instance with API key", () => {
+      const testClient = init({ apiKey: "test-key" });
+      expect(testClient).toBeDefined();
+      expect(testClient.usages).toBeDefined();
+      expect(testClient.customers).toBeDefined();
+      expect(testClient.checkout).toBeDefined();
     });
 
     it("should use custom base URL when provided", () => {
-      const sdk = new MetrifoxSDK({
+      const testClient = init({
         apiKey: "test-key",
         baseUrl: "https://custom.api.com",
       });
-      expect(sdk).toBeInstanceOf(MetrifoxSDK);
+      expect(testClient).toBeDefined();
     });
   });
 
@@ -56,14 +58,13 @@ describe("MetrifoxSDK", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const sdk = new MetrifoxSDK({ apiKey: "test-key" });
-      const result = await sdk.checkAccess({
+      const result = await client.usages.checkAccess({
         featureKey: "test-feature",
         customerKey: "test-customer",
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://metrifox-api.staging.useyala.com/api/v1/usage/access?feature_key=test-feature&customer_key=test-customer",
+        "https://api.metrifox.com/api/v1/usage/access?feature_key=test-feature&customer_key=test-customer",
         {
           method: "GET",
           headers: {
@@ -83,14 +84,12 @@ describe("MetrifoxSDK", () => {
         statusText: "Unauthorized",
       });
 
-      const sdk = new MetrifoxSDK({ apiKey: "test-key" });
-
       await expect(
-        sdk.checkAccess({
+        client.usages.checkAccess({
           featureKey: "test-feature",
           customerKey: "test-customer",
         })
-      ).rejects.toThrow("Failed to check access");
+      ).rejects.toThrow("Request failed: 401 Unauthorized");
     });
   });
 
@@ -107,15 +106,14 @@ describe("MetrifoxSDK", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const sdk = new MetrifoxSDK({ apiKey: "test-key" });
-      const result = await sdk.recordUsage({
+      const result = await client.usages.recordUsage({
         customerKey: "test-customer",
         eventName: "test-event",
         amount: 1,
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://metrifox-api.staging.useyala.com/api/v1/usage/events",
+        "https://api.metrifox.com/api/v1/usage/events",
         {
           method: "POST",
           headers: {
@@ -133,6 +131,130 @@ describe("MetrifoxSDK", () => {
       expect(result).toEqual(mockResponse);
     });
 
+    it("should make correct API call with all optional fields", async () => {
+      const mockResponse = {
+        message: "Usage recorded",
+        eventName: "test-event",
+        customerKey: "test-customer",
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.usages.recordUsage({
+        customerKey: "test-customer",
+        eventName: "test-event",
+        amount: 5,
+        credit_used: 25,
+        event_id: "evt_abc123",
+        timestamp: 1640995200000,
+        metadata: { feature_type: "premium", session_id: "sess_xyz789" },
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/usage/events",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            customer_key: "test-customer",
+            event_name: "test-event",
+            amount: 5,
+            credit_used: 25,
+            event_id: "evt_abc123",
+            timestamp: 1640995200000,
+            metadata: { feature_type: "premium", session_id: "sess_xyz789" },
+          }),
+        }
+      );
+
+      expect(result).toEqual(mockResponse);
+    });
+
+    it("should make correct API call with partial optional fields", async () => {
+      const mockResponse = {
+        message: "Usage recorded",
+        eventName: "test-event",
+        customerKey: "test-customer",
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.usages.recordUsage({
+        customerKey: "test-customer",
+        eventName: "test-event",
+        credit_used: 10,
+        metadata: { source: "api" },
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/usage/events",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            customer_key: "test-customer",
+            event_name: "test-event",
+            amount: 1, // Default value
+            credit_used: 10,
+            metadata: { source: "api" },
+          }),
+        }
+      );
+
+      expect(result).toEqual(mockResponse);
+    });
+
+    it("should not include undefined optional fields in request body", async () => {
+      const mockResponse = {
+        message: "Usage recorded",
+        eventName: "test-event",
+        customerKey: "test-customer",
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.usages.recordUsage({
+        customerKey: "test-customer",
+        eventName: "test-event",
+        amount: 2,
+        // Optional fields not provided - should not appear in body
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/usage/events",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            customer_key: "test-customer",
+            event_name: "test-event",
+            amount: 2,
+            // No optional fields in body
+          }),
+        }
+      );
+
+      expect(result).toEqual(mockResponse);
+    });
+
     it("should throw error on failed usage recording", async () => {
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
@@ -140,20 +262,18 @@ describe("MetrifoxSDK", () => {
         statusText: "Internal Server Error",
       });
 
-      const sdk = new MetrifoxSDK({ apiKey: "test-key" });
-
       await expect(
-        sdk.recordUsage({
+        client.usages.recordUsage({
           customerKey: "test-customer",
           eventName: "test-event",
           amount: 1,
         })
-      ).rejects.toThrow("Failed to record usage");
+      ).rejects.toThrow("Request failed: 500 Internal Server Error");
     });
   });
 
-  describe("createCustomer", () => {
-    it("should make correct API call for customer create sync", async () => {
+  describe("customer management", () => {
+    it("should make correct API call for customer creation", async () => {
       const mockResponse = {
         statusCode: 200,
         message: "Customer Sync Successful",
@@ -171,21 +291,17 @@ describe("MetrifoxSDK", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const sdk = new MetrifoxSDK({ apiKey: "test-key" });
-      const result = await sdk.syncCustomer({
-        event_name: "customer.created",
-        data: {
-          customer_key: "test-custome-key",
-          primary_email: "test_customer@example.com",
-          first_name: "Test",
-          last_name: "Customer",
-          primary_phone: "1234567890",
-          customer_type: "INDIVIDUAL"
-        }
+      const result = await client.customers.create({
+        customer_key: "test-custome-key",
+        primary_email: "test_customer@example.com",
+        first_name: "Test",
+        last_name: "Customer",
+        primary_phone: "1234567890",
+        customer_type: "INDIVIDUAL"
       });
 
       expect(fetch).toHaveBeenCalledWith(
-          "https://metrifox-api.staging.useyala.com/api/v1/webhooks",
+          "https://api.metrifox.com/api/v1/customers/new",
           {
             method: "POST",
             headers: {
@@ -193,15 +309,12 @@ describe("MetrifoxSDK", () => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              event_name: "customer.created",
-              data: {
-                customer_key: "test-custome-key",
-                primary_email: "test_customer@example.com",
-                first_name: "Test",
-                last_name: "Customer",
-                primary_phone: "1234567890",
-                customer_type: "INDIVIDUAL"
-              }
+              customer_key: "test-custome-key",
+              primary_email: "test_customer@example.com",
+              first_name: "Test",
+              last_name: "Customer",
+              primary_phone: "1234567890",
+              customer_type: "INDIVIDUAL"
             }),
           }
       );
@@ -209,7 +322,7 @@ describe("MetrifoxSDK", () => {
       expect(result).toEqual(mockResponse);
     });
 
-    it("should make correct API call for customer update sync", async () => {
+    it("should make correct API call for customer update", async () => {
       const mockResponse = {
         statusCode: 200,
         message: "Customer Sync Successful",
@@ -227,37 +340,30 @@ describe("MetrifoxSDK", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const sdk = new MetrifoxSDK({ apiKey: "test-key" });
-      const result = await sdk.syncCustomer({
-        event_name: "customer.updated",
-        data: {
-          customer_key: "test-custome-key",
-          primary_email: "updated_test_customer@example.com",
-          first_name: "Updated Test",
-          last_name: "Updated Customer",
-          primary_phone: "0987654321",
-          customer_type: "BUSINESS"
-        }
+      const result = await client.customers.update("test-custome-key", {
+        customer_key: "test-custome-key",
+        primary_email: "updated_test_customer@example.com",
+        first_name: "Updated Test",
+        last_name: "Updated Customer",
+        primary_phone: "0987654321",
+        customer_type: "BUSINESS"
       });
 
       expect(fetch).toHaveBeenCalledWith(
-          "https://metrifox-api.staging.useyala.com/api/v1/webhooks",
+          "https://api.metrifox.com/api/v1/customers/test-custome-key",
           {
-            method: "POST",
+            method: "PATCH",
             headers: {
               "x-api-key": "test-key",
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              event_name: "customer.updated",
-              data: {
-                customer_key: "test-custome-key",
-                primary_email: "updated_test_customer@example.com",
-                first_name: "Updated Test",
-                last_name: "Updated Customer",
-                primary_phone: "0987654321",
-                customer_type: "BUSINESS"
-              }
+              customer_key: "test-custome-key",
+              primary_email: "updated_test_customer@example.com",
+              first_name: "Updated Test",
+              last_name: "Updated Customer",
+              primary_phone: "0987654321",
+              customer_type: "BUSINESS"
             }),
           }
       );
@@ -272,53 +378,38 @@ describe("MetrifoxSDK", () => {
         statusText: "Internal Server Error",
       });
 
-      const sdk = new MetrifoxSDK({ apiKey: "test-key" });
-
       await expect(
-          sdk.syncCustomer({
-            event_name: "customer.updated",
-            data: {
-              customer_key: "test-custome-key",
-              primary_email: "updated_test_customer@example.com",
-              first_name: "Updated Test",
-              last_name: "Updated Customer",
-              primary_phone: "0987654321",
-              customer_type: "BUSINESS"
-            }
+          client.customers.update("test-custome-key", {
+            customer_key: "test-custome-key",
+            primary_email: "updated_test_customer@example.com",
+            first_name: "Updated Test",
+            last_name: "Updated Customer",
+            primary_phone: "0987654321",
+            customer_type: "BUSINESS"
           })
-      ).rejects.toThrow("Failed to Sync Customer");
+      ).rejects.toThrow("Request failed: 500 Internal Server Error");
     });
   });
-  describe("convenience functions", () => {
-    it("should initialize and use default SDK instance", async () => {
-      const mockResponse = {
-        message: "Access checked",
-        canAccess: true,
-        customerId: "test-customer",
-        featureKey: "test-feature",
-        requiredQuantity: 1,
-        usedQuantity: 0,
-        includedUsage: 10,
-        nextResetAt: 1234567890,
-        quota: 100,
-        unlimited: false,
-        carryoverQuantity: 0,
-        balance: 10,
-      };
+  describe("client modules", () => {
+    it("should have usages module for usage tracking", async () => {
+      expect(client.usages).toBeDefined();
+      expect(typeof client.usages.checkAccess).toBe('function');
+      expect(typeof client.usages.recordUsage).toBe('function');
+    });
 
-      (fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      });
+    it("should have customers module for customer management", async () => {
+      expect(client.customers).toBeDefined();
+      expect(typeof client.customers.create).toBe('function');
+      expect(typeof client.customers.update).toBe('function');
+      expect(typeof client.customers.list).toBe('function');
+      expect(typeof client.customers.get).toBe('function');
+      expect(typeof client.customers.delete).toBe('function');
+    });
 
-      init({ apiKey: "test-key" });
-
-      const result = await checkAccess({
-        featureKey: "test-feature",
-        customerKey: "test-customer",
-      });
-
-      expect(result).toEqual(mockResponse);
+    it("should have checkout module for billing", async () => {
+      expect(client.checkout).toBeDefined();
+      expect(typeof client.checkout.embed).toBe('function');
+      expect(typeof client.checkout.url).toBe('function');
     });
   });
 });

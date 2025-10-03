@@ -28,6 +28,10 @@ export interface UsageEventRequest {
   customerKey: string;
   eventName: string;
   amount?: number; // Optional, defaults to 1
+  credit_used?: number; // Optional
+  event_id?: string; // Optional
+  timestamp?: number; // Optional
+  metadata?: Record<string, any>; // Optional, defaults to {}
 }
 
 export interface UsageEventResponse {

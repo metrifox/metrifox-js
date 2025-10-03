@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-10-03
+
+### Added
+
+- `checkout.url()` function to generate checkout URLs for customers
+- Support for offering-based checkout URL generation
+- Billing interval parameter support for checkout URLs
+- Customer-specific checkout URL generation
+- Enhanced checkout module with URL generation capabilities
+
+### Documentation
+
+- Updated README with checkout URL usage examples
+- Added integration examples for custom pricing pages
+- Documented checkout URL parameters and usage patterns
+
 ## [1.0.0] - 2024-01-01
 
 ### Added

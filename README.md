@@ -271,9 +271,9 @@ const client = window.metrifoxClient; // or your stored client instance
 
 // Individual customer
 const individualCustomer = {
-  customer_key: "user_12345",
-  customer_type: "INDIVIDUAL",
-  primary_email: "john.doe@example.com",
+  customer_key: "user_12345", // Required: unique identifier (cannot be changed later)
+  customer_type: "INDIVIDUAL", // Required: "INDIVIDUAL" or "BUSINESS"
+  primary_email: "john.doe@example.com", // Required: primary contact email
   first_name: "John",
   last_name: "Doe",
   primary_phone: "+1234567890",
@@ -291,9 +291,9 @@ console.log("Customer created:", response.data);
 ```javascript
 // Business customer
 const businessCustomer = {
-  customer_key: "company_abc123",
-  customer_type: "BUSINESS",
-  primary_email: "contact@acmecorp.com",
+  customer_key: "company_abc123", // Required: unique identifier (cannot be changed later)
+  customer_type: "BUSINESS", // Required: "INDIVIDUAL" or "BUSINESS"
+  primary_email: "contact@acmecorp.com", // Required: primary contact email
   legal_name: "ACME Corporation LLC",
   display_name: "ACME Corp",
   website_url: "https://acmecorp.com",
@@ -307,20 +307,21 @@ const response = await client.customers.create(businessCustomer);
 
 ### Updating Customers
 
-Modify existing customer information:
+Modify existing customer information (note: customer_key cannot be changed):
 
 ```javascript
 const client = window.metrifoxClient;
 
 const updates = {
-  customer_key: "updated_customer_key", // Can change the key if needed
+  // Note: customer_key cannot be updated - it's used as the identifier
   primary_email: "newemail@example.com",
   first_name: "Jane", // Update individual fields
   currency: "EUR", // Change preferences
+  customer_type: "INDIVIDUAL", // Can change type if needed
 };
 
 const response = await client.customers.update(
-  "existing_customer_key",
+  "existing_customer_key", // The customer_key is passed as a parameter
   updates
 );
 ```

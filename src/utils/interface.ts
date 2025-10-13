@@ -100,10 +100,10 @@ export interface PaymentTerm {
 type CustomerType = "BUSINESS" | "INDIVIDUAL";
 
 export interface CustomerCreateRequest {
-  // Core fields
-  customer_key: string; // required field
-  customer_type: CustomerType;
-  primary_email: string; // required field
+  // Core fields (required)
+  customer_key: string; // required - unique identifier for the customer
+  customer_type: CustomerType; // required - "INDIVIDUAL" or "BUSINESS"  
+  primary_email: string; // required - primary contact email
   primary_phone?: string;
 
   // Business fields
@@ -153,8 +153,7 @@ export interface CustomerCreateRequest {
 }
 
 export interface CustomerUpdateRequest {
-  // Core fields
-  customer_key: string; // required field
+  // Core fields (customer_key cannot be updated - it's used as the identifier)
   customer_type?: CustomerType;
   primary_email?: string;
   primary_phone?: string;

@@ -341,7 +341,6 @@ describe("Metrifox SDK", () => {
       });
 
       const result = await client.customers.update("test-customer-key", {
-        customer_key: "test-customer-key",
         primary_email: "updated_test_customer@example.com",
         first_name: "Updated Test",
         last_name: "Updated Customer",
@@ -358,7 +357,6 @@ describe("Metrifox SDK", () => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              customer_key: "test-customer-key",
               primary_email: "updated_test_customer@example.com",
               first_name: "Updated Test",
               last_name: "Updated Customer",
@@ -380,7 +378,6 @@ describe("Metrifox SDK", () => {
 
       await expect(
           client.customers.update("test-customer-key", {
-            customer_key: "test-customer-key",
             primary_email: "updated_test_customer@example.com",
             first_name: "Updated Test",
             last_name: "Updated Customer",

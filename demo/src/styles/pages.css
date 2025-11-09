@@ -15,6 +15,7 @@
     border: 1px solid var(--metrifox-border);
     display: flex;
     flex-direction: column;
+    overflow: auto;
 }
 
 .content-title {

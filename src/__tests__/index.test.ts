@@ -409,4 +409,82 @@ describe("Metrifox SDK", () => {
       expect(typeof client.checkout.url).toBe('function');
     });
   });
+
+  describe("checkout.url", () => {
+    it("should generate checkout URL via API endpoint", async () => {
+      const mockResponse = {
+        data: {
+          checkout_url: "https://app.metrifox.com/test-checkout/checkout/test-offering?billing_period=monthly&customer=test-customer"
+        }
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.checkout.url({
+        offeringKey: "test-offering",
+        billingInterval: "monthly",
+        customerKey: "test-customer",
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/products/offerings/generate-checkout-url?offering_key=test-offering&billing_interval=monthly&customer_key=test-customer",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      expect(result).toEqual(mockResponse.data.checkout_url);
+    });
+
+    it("should generate checkout URL without optional parameters", async () => {
+      const mockResponse = {
+        data: {
+          checkout_url: "https://app.metrifox.com/test-checkout/checkout/test-offering"
+        }
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.checkout.url({
+        offeringKey: "test-offering",
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/products/offerings/generate-checkout-url?offering_key=test-offering",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      expect(result).toEqual(mockResponse.data.checkout_url);
+    });
+
+    it("should throw error on failed checkout URL generation", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        statusText: "Bad Request",
+      });
+
+      await expect(
+        client.checkout.url({
+          offeringKey: "test-offering",
+        })
+      ).rejects.toThrow("Request failed: 400 Bad Request");
+    });
+  });
 });

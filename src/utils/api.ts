@@ -206,3 +206,33 @@ export async function uploadCustomersCsv(
   return response.json();
 }
 
+export async function generateCheckoutUrl(
+  baseUrl: string,
+  apiKey: string,
+  offeringKey: string,
+  billingInterval?: string,
+  customerKey?: string
+): Promise<string> {
+  const url = new URL("products/offerings/generate-checkout-url", baseUrl);
+
+  url.searchParams.append("offering_key", offeringKey);
+
+  if (billingInterval) {
+    url.searchParams.append("billing_interval", billingInterval);
+  }
+
+  if (customerKey) {
+    url.searchParams.append("customer_key", customerKey);
+  }
+
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
+  });
+
+  if (!response.ok) throw new Error("Failed to generate checkout URL");
+
+  const data = await response.json();
+  return data?.data?.checkout_url;
+}
+

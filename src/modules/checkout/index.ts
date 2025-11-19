@@ -23,23 +23,23 @@ export class CheckoutModule extends BaseClient {
   }
 
   async url(config: CheckoutConfig): Promise<string> {
-    const checkoutKey = await this.getCheckoutKey();
-    if (!checkoutKey) {
-      throw new Error(
-        "Checkout Key could not be retrieved. Ensure the API key is valid"
-      );
-    }
+    const params: Record<string, string> = {
+      offering_key: config.offeringKey,
+    };
 
-    const urlString = `${this.webBaseUrl}/${checkoutKey}/checkout/${config.offeringKey}`;
-    const url = new URL(urlString);
     if (config.billingInterval) {
-      url.searchParams.set("billing_period", config.billingInterval);
+      params.billing_interval = config.billingInterval;
     }
-    if (config.customerKey) {
-      url.searchParams.set("customer", config.customerKey);
-    }
-    const checkoutUrl = url.toString();
 
-    return checkoutUrl;
+    if (config.customerKey) {
+      params.customer_key = config.customerKey;
+    }
+
+    const response = await this.makeRequest("products/offerings/generate-checkout-url", {
+      method: "GET",
+      params,
+    });
+
+    return response?.data?.checkout_url;
   }
 }

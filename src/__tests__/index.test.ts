@@ -387,6 +387,62 @@ describe("Metrifox SDK", () => {
       ).rejects.toThrow("Request failed: 500 Internal Server Error");
     });
   });
+
+  describe("hasActiveSubscription", () => {
+    it("should check if customer has active subscription", async () => {
+      const mockResponse = {
+        has_active_subscription: true
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.customers.hasActiveSubscription("test-customer-key");
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/customers/test-customer-key/check-active-subscription",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it("should return false when customer has no active subscription", async () => {
+      const mockResponse = {
+        has_active_subscription: false
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.customers.hasActiveSubscription("test-customer-key");
+
+      expect(result).toBe(false);
+    });
+
+    it("should throw error on failed subscription check", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+      });
+
+      await expect(
+        client.customers.hasActiveSubscription("invalid-customer")
+      ).rejects.toThrow("Request failed: 404 Not Found");
+    });
+  });
+
   describe("client modules", () => {
     it("should have usages module for usage tracking", async () => {
       expect(client.usages).toBeDefined();

@@ -236,3 +236,21 @@ export async function generateCheckoutUrl(
   return data?.data?.checkout_url;
 }
 
+export async function checkActiveSubscription(
+  baseUrl: string,
+  apiKey: string,
+  customerKey: string
+): Promise<boolean> {
+  const url = new URL(`/api/v1/customers/${customerKey}/check-active-subscription`, baseUrl);
+
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
+  });
+
+  if (!response.ok) throw new Error("Failed to check active subscription");
+
+  const data = await response.json();
+  return data?.has_active_subscription;
+}
+

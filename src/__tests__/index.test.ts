@@ -391,7 +391,13 @@ describe("Metrifox SDK", () => {
   describe("hasActiveSubscription", () => {
     it("should check if customer has active subscription", async () => {
       const mockResponse = {
-        has_active_subscription: true
+        statusCode: 200,
+        message: "Active Subscription Check Successful",
+        data: {
+          has_active_subscription: true
+        },
+        errors: {},
+        meta: {}
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
@@ -417,7 +423,13 @@ describe("Metrifox SDK", () => {
 
     it("should return false when customer has no active subscription", async () => {
       const mockResponse = {
-        has_active_subscription: false
+        statusCode: 200,
+        message: "Active Subscription Check Successful",
+        data: {
+          has_active_subscription: false
+        },
+        errors: {},
+        meta: {}
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({

@@ -64,7 +64,7 @@ export class CustomersModule extends BaseClient {
         });
     }
 
-    async hasActiveSubscription(customerKey: string): Promise<boolean> {
+    async checkActiveSubscription(customerKey: string): Promise<boolean> {
         const response = await this.makeRequest(`customers/${customerKey}/check-active-subscription`);
         return response?.data?.has_active_subscription;
     }

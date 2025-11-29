@@ -388,7 +388,7 @@ describe("Metrifox SDK", () => {
     });
   });
 
-  describe("hasActiveSubscription", () => {
+  describe("checkActiveSubscription", () => {
     it("should check if customer has active subscription", async () => {
       const mockResponse = {
         statusCode: 200,
@@ -405,7 +405,7 @@ describe("Metrifox SDK", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await client.customers.hasActiveSubscription("test-customer-key");
+      const result = await client.customers.checkActiveSubscription("test-customer-key");
 
       expect(fetch).toHaveBeenCalledWith(
         "https://api.metrifox.com/api/v1/customers/test-customer-key/check-active-subscription",
@@ -437,7 +437,7 @@ describe("Metrifox SDK", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await client.customers.hasActiveSubscription("test-customer-key");
+      const result = await client.customers.checkActiveSubscription("test-customer-key");
 
       expect(result).toBe(false);
     });
@@ -450,7 +450,7 @@ describe("Metrifox SDK", () => {
       });
 
       await expect(
-        client.customers.hasActiveSubscription("invalid-customer")
+        client.customers.checkActiveSubscription("invalid-customer")
       ).rejects.toThrow("Request failed: 404 Not Found");
     });
   });

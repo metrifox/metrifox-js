@@ -387,6 +387,74 @@ describe("Metrifox SDK", () => {
       ).rejects.toThrow("Request failed: 500 Internal Server Error");
     });
   });
+
+  describe("checkActiveSubscription", () => {
+    it("should check if customer has active subscription", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        message: "Active Subscription Check Successful",
+        data: {
+          has_active_subscription: true
+        },
+        errors: {},
+        meta: {}
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.customers.checkActiveSubscription("test-customer-key");
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/customers/test-customer-key/check-active-subscription",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it("should return false when customer has no active subscription", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        message: "Active Subscription Check Successful",
+        data: {
+          has_active_subscription: false
+        },
+        errors: {},
+        meta: {}
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.customers.checkActiveSubscription("test-customer-key");
+
+      expect(result).toBe(false);
+    });
+
+    it("should throw error on failed subscription check", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+      });
+
+      await expect(
+        client.customers.checkActiveSubscription("invalid-customer")
+      ).rejects.toThrow("Request failed: 404 Not Found");
+    });
+  });
+
   describe("client modules", () => {
     it("should have usages module for usage tracking", async () => {
       expect(client.usages).toBeDefined();

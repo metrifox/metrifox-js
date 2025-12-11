@@ -38,11 +38,13 @@ export class BaseClient {
             body?: any;
             params?: Record<string, string>;
             isFormData?: boolean;
+            useMeterBaseUrl?: boolean;
         } = {}
     ): Promise<any> {
-        const { method = 'GET', body, params, isFormData = false } = options;
+        const { method = 'GET', body, params, isFormData = false, useMeterBaseUrl = false } = options;
 
-        const url = new URL(endpoint, this.baseUrl);
+        const baseUrl = useMeterBaseUrl ? this.meterBaseUrl : this.baseUrl;
+        const url = new URL(endpoint, baseUrl);
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
                 url.searchParams.append(key, value);

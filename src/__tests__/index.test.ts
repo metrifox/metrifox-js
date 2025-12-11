@@ -90,7 +90,7 @@ describe("Metrifox SDK", () => {
           featureKey: "test-feature",
           customerKey: "test-customer",
         })
-      ).rejects.toThrow("Failed to check access");
+      ).rejects.toThrow("Request failed: 401 Unauthorized");
     });
   });
 
@@ -281,7 +281,7 @@ describe("Metrifox SDK", () => {
           eventName: "test-event",
           amount: 1,
         })
-      ).rejects.toThrow("Failed to record usage");
+      ).rejects.toThrow("Request failed: 500 Internal Server Error");
     });
   });
 

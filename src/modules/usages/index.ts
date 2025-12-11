@@ -8,15 +8,23 @@ import {
 
 export class UsagesModule extends BaseClient {
     async checkAccess(request: AccessCheckRequest): Promise<AccessResponse> {
-        return this.makeRequest("usage/access", {
-            params: {
-                feature_key: request.featureKey,
-                customer_key: request.customerKey
-            }
+        const url = new URL("usage/access", this.meterBaseUrl);
+        url.searchParams.append("feature_key", request.featureKey);
+        url.searchParams.append("customer_key", request.customerKey);
+
+        const response = await fetch(url.toString(), {
+            method: "GET",
+            headers: { "x-api-key": this.apiKey, "Content-Type": "application/json" },
         });
+
+        if (!response.ok) throw new Error("Failed to check access");
+
+        return response.json();
     }
 
     async recordUsage(request: UsageEventRequest): Promise<UsageEventResponse> {
+        const url = new URL("usage/events", this.meterBaseUrl);
+
         const body: any = {
             customer_key: request.customerKey,
             event_name: request.eventName,
@@ -37,9 +45,14 @@ export class UsagesModule extends BaseClient {
             body.metadata = request.metadata;
         }
 
-        return this.makeRequest("usage/events", {
+        const response = await fetch(url.toString(), {
             method: "POST",
-            body
+            headers: { "x-api-key": this.apiKey, "Content-Type": "application/json" },
+            body: JSON.stringify(body),
         });
+
+        if (!response.ok) throw new Error("Failed to record usage");
+
+        return response.json();
     }
 }

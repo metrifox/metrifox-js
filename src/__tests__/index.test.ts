@@ -39,18 +39,19 @@ describe("Metrifox SDK", () => {
   describe("checkAccess", () => {
     it("should make correct API call for access check", async () => {
       const mockResponse = {
-        message: "Access checked",
-        canAccess: true,
-        customerId: "test-customer",
-        featureKey: "test-feature",
-        requiredQuantity: 1,
-        usedQuantity: 0,
-        includedUsage: 10,
-        nextResetAt: 1234567890,
-        quota: 100,
-        unlimited: false,
-        carryoverQuantity: 0,
-        balance: 10,
+        data: {
+          customer_key: "test-customer",
+          feature_key: "test-feature",
+          requested_quantity: 1,
+          can_access: true,
+          unlimited: false,
+          balance: 10,
+          used_quantity: 0,
+          entitlement_active: true,
+          prepaid: false,
+          wallet_balance: 0,
+          message: "Feature found",
+        },
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
@@ -64,7 +65,7 @@ describe("Metrifox SDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api.metrifox.com/api/v1/usage/access?feature_key=test-feature&customer_key=test-customer",
+        "https://api-meter.metrifox.com/api/v1/usage/access?feature_key=test-feature&customer_key=test-customer",
         {
           method: "GET",
           headers: {
@@ -89,16 +90,19 @@ describe("Metrifox SDK", () => {
           featureKey: "test-feature",
           customerKey: "test-customer",
         })
-      ).rejects.toThrow("Request failed: 401 Unauthorized");
+      ).rejects.toThrow("Failed to check access");
     });
   });
 
   describe("recordUsage", () => {
     it("should make correct API call for usage recording", async () => {
       const mockResponse = {
-        message: "Usage recorded",
-        eventName: "test-event",
-        customerKey: "test-customer",
+        data: {
+          customer_key: "test-customer",
+          quantity: 1,
+          feature_key: "test-feature",
+        },
+        message: "Event received",
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
@@ -113,7 +117,7 @@ describe("Metrifox SDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api.metrifox.com/api/v1/usage/events",
+        "https://api-meter.metrifox.com/api/v1/usage/events",
         {
           method: "POST",
           headers: {
@@ -133,9 +137,12 @@ describe("Metrifox SDK", () => {
 
     it("should make correct API call with all optional fields", async () => {
       const mockResponse = {
-        message: "Usage recorded",
-        eventName: "test-event",
-        customerKey: "test-customer",
+        data: {
+          customer_key: "test-customer",
+          quantity: 5,
+          feature_key: "test-feature",
+        },
+        message: "Event received",
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
@@ -154,7 +161,7 @@ describe("Metrifox SDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api.metrifox.com/api/v1/usage/events",
+        "https://api-meter.metrifox.com/api/v1/usage/events",
         {
           method: "POST",
           headers: {
@@ -178,9 +185,12 @@ describe("Metrifox SDK", () => {
 
     it("should make correct API call with partial optional fields", async () => {
       const mockResponse = {
-        message: "Usage recorded",
-        eventName: "test-event",
-        customerKey: "test-customer",
+        data: {
+          customer_key: "test-customer",
+          quantity: 1,
+          feature_key: "test-feature",
+        },
+        message: "Event received",
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
@@ -196,7 +206,7 @@ describe("Metrifox SDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api.metrifox.com/api/v1/usage/events",
+        "https://api-meter.metrifox.com/api/v1/usage/events",
         {
           method: "POST",
           headers: {
@@ -218,9 +228,12 @@ describe("Metrifox SDK", () => {
 
     it("should not include undefined optional fields in request body", async () => {
       const mockResponse = {
-        message: "Usage recorded",
-        eventName: "test-event",
-        customerKey: "test-customer",
+        data: {
+          customer_key: "test-customer",
+          quantity: 2,
+          feature_key: "test-feature",
+        },
+        message: "Event received",
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
@@ -236,7 +249,7 @@ describe("Metrifox SDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api.metrifox.com/api/v1/usage/events",
+        "https://api-meter.metrifox.com/api/v1/usage/events",
         {
           method: "POST",
           headers: {
@@ -268,7 +281,7 @@ describe("Metrifox SDK", () => {
           eventName: "test-event",
           amount: 1,
         })
-      ).rejects.toThrow("Request failed: 500 Internal Server Error");
+      ).rejects.toThrow("Failed to record usage");
     });
   });
 

@@ -9,19 +9,22 @@ export interface AccessCheckRequest {
   customerKey: string;
 }
 
-export interface AccessResponse {
-  can_access: boolean;
+export interface AccessResponseData {
   customer_key: string;
   feature_key: string;
-  used_quantity: number;
-  quota: number;
-  balance: number;
-  next_reset_at: number;
-  message: string;
-  required_quantity: number;
-  included_usage: number;
+  requested_quantity: number;
+  can_access: boolean;
   unlimited: boolean;
-  carryover_quantity: number;
+  balance: number;
+  used_quantity: number;
+  entitlement_active: boolean;
+  prepaid: boolean;
+  wallet_balance: number;
+  message: string;
+}
+
+export interface AccessResponse {
+  data: AccessResponseData;
 }
 
 export interface UsageEventRequest {
@@ -34,10 +37,15 @@ export interface UsageEventRequest {
   metadata?: Record<string, any>; // Optional, defaults to {}
 }
 
+export interface UsageEventResponseData {
+  customer_key: string;
+  quantity: number;
+  feature_key: string;
+}
+
 export interface UsageEventResponse {
+  data: UsageEventResponseData;
   message: string;
-  eventName: string;
-  customerKey: string;
 }
 
 export enum TaxStatus {

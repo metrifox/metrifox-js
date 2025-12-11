@@ -29,10 +29,11 @@ export interface AccessResponse {
 
 export interface UsageEventRequest {
   customerKey: string;
-  eventName: string;
+  eventName?: string; // Either eventName or featureKey is required
+  featureKey?: string; // Either eventName or featureKey is required
+  eventId: string; // Required for idempotency
   amount?: number; // Optional, defaults to 1
-  credit_used?: number; // Optional
-  event_id?: string; // Optional
+  creditUsed?: number; // Optional
   timestamp?: number; // Optional
   metadata?: Record<string, any>; // Optional, defaults to {}
 }

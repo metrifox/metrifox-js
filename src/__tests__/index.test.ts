@@ -113,6 +113,7 @@ describe("Metrifox SDK", () => {
       const result = await client.usages.recordUsage({
         customerKey: "test-customer",
         eventName: "test-event",
+        eventId: "evt_test123",
         amount: 1,
       });
 
@@ -126,8 +127,9 @@ describe("Metrifox SDK", () => {
           },
           body: JSON.stringify({
             customer_key: "test-customer",
-            event_name: "test-event",
+            event_id: "evt_test123",
             amount: 1,
+            event_name: "test-event",
           }),
         }
       );
@@ -154,8 +156,8 @@ describe("Metrifox SDK", () => {
         customerKey: "test-customer",
         eventName: "test-event",
         amount: 5,
-        credit_used: 25,
-        event_id: "evt_abc123",
+        creditUsed: 25,
+        eventId: "evt_abc123",
         timestamp: 1640995200000,
         metadata: { feature_type: "premium", session_id: "sess_xyz789" },
       });
@@ -170,10 +172,10 @@ describe("Metrifox SDK", () => {
           },
           body: JSON.stringify({
             customer_key: "test-customer",
-            event_name: "test-event",
-            amount: 5,
-            credit_used: 25,
             event_id: "evt_abc123",
+            amount: 5,
+            event_name: "test-event",
+            credit_used: 25,
             timestamp: 1640995200000,
             metadata: { feature_type: "premium", session_id: "sess_xyz789" },
           }),
@@ -201,7 +203,8 @@ describe("Metrifox SDK", () => {
       const result = await client.usages.recordUsage({
         customerKey: "test-customer",
         eventName: "test-event",
-        credit_used: 10,
+        eventId: "evt_partial123",
+        creditUsed: 10,
         metadata: { source: "api" },
       });
 
@@ -215,8 +218,9 @@ describe("Metrifox SDK", () => {
           },
           body: JSON.stringify({
             customer_key: "test-customer",
-            event_name: "test-event",
+            event_id: "evt_partial123",
             amount: 1, // Default value
+            event_name: "test-event",
             credit_used: 10,
             metadata: { source: "api" },
           }),
@@ -244,6 +248,7 @@ describe("Metrifox SDK", () => {
       const result = await client.usages.recordUsage({
         customerKey: "test-customer",
         eventName: "test-event",
+        eventId: "evt_minimal123",
         amount: 2,
         // Optional fields not provided - should not appear in body
       });
@@ -258,9 +263,52 @@ describe("Metrifox SDK", () => {
           },
           body: JSON.stringify({
             customer_key: "test-customer",
-            event_name: "test-event",
+            event_id: "evt_minimal123",
             amount: 2,
+            event_name: "test-event",
             // No optional fields in body
+          }),
+        }
+      );
+
+      expect(result).toEqual(mockResponse);
+    });
+
+    it("should make correct API call with featureKey instead of eventName", async () => {
+      const mockResponse = {
+        data: {
+          customer_key: "test-customer",
+          quantity: 1,
+          feature_key: "feature_seats",
+        },
+        message: "Event received",
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.usages.recordUsage({
+        customerKey: "test-customer",
+        featureKey: "feature_seats",
+        eventId: "evt_feature123",
+        amount: 1,
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api-meter.metrifox.com/api/v1/usage/events",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            customer_key: "test-customer",
+            event_id: "evt_feature123",
+            amount: 1,
+            feature_key: "feature_seats",
           }),
         }
       );
@@ -279,6 +327,7 @@ describe("Metrifox SDK", () => {
         client.usages.recordUsage({
           customerKey: "test-customer",
           eventName: "test-event",
+          eventId: "evt_fail123",
           amount: 1,
         })
       ).rejects.toThrow("Request failed: 500 Internal Server Error");

@@ -12,23 +12,28 @@ export class UsagesModule extends BaseClient {
             params: {
                 feature_key: request.featureKey,
                 customer_key: request.customerKey
-            }
+            },
+            useMeterBaseUrl: true
         });
     }
 
     async recordUsage(request: UsageEventRequest): Promise<UsageEventResponse> {
         const body: any = {
             customer_key: request.customerKey,
-            event_name: request.eventName,
+            event_id: request.eventId,
             amount: request.amount ?? 1,
         };
 
-        // Add optional fields if they are provided
-        if (request.credit_used !== undefined) {
-            body.credit_used = request.credit_used;
+        // Use either event_name or feature_key
+        if (request.eventName) {
+            body.event_name = request.eventName;
+        } else if (request.featureKey) {
+            body.feature_key = request.featureKey;
         }
-        if (request.event_id !== undefined) {
-            body.event_id = request.event_id;
+
+        // Add optional fields if they are provided
+        if (request.creditUsed !== undefined) {
+            body.credit_used = request.creditUsed;
         }
         if (request.timestamp !== undefined) {
             body.timestamp = request.timestamp;
@@ -39,7 +44,8 @@ export class UsagesModule extends BaseClient {
 
         return this.makeRequest("usage/events", {
             method: "POST",
-            body
+            body,
+            useMeterBaseUrl: true
         });
     }
 }

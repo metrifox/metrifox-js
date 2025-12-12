@@ -1,3 +1,5 @@
+import { METER_BASE_URL, API_BASE_URL, WEB_BASE_URL } from "../utils/constants";
+
 export interface MetrifoxConfig {
     apiKey?: string;
     baseUrl?: string;
@@ -7,12 +9,14 @@ export interface MetrifoxConfig {
 export class BaseClient {
     protected apiKey: string;
     protected baseUrl: string;
+    protected meterBaseUrl: string;
     protected webBaseUrl: string;
 
     constructor(config: MetrifoxConfig) {
         this.apiKey = config.apiKey || this.getApiKeyFromEnvironment();
-        this.baseUrl = config.baseUrl || "https://api.metrifox.com/api/v1/";
-        this.webBaseUrl = config.webAppBaseUrl || "https://app.metrifox.com";
+        this.baseUrl = config.baseUrl || API_BASE_URL;
+        this.meterBaseUrl = METER_BASE_URL;
+        this.webBaseUrl = config.webAppBaseUrl || WEB_BASE_URL;
 
         if (!this.apiKey) throw new Error("API key required");
     }
@@ -34,11 +38,13 @@ export class BaseClient {
             body?: any;
             params?: Record<string, string>;
             isFormData?: boolean;
+            useMeterBaseUrl?: boolean;
         } = {}
     ): Promise<any> {
-        const { method = 'GET', body, params, isFormData = false } = options;
+        const { method = 'GET', body, params, isFormData = false, useMeterBaseUrl = false } = options;
 
-        const url = new URL(endpoint, this.baseUrl);
+        const baseUrl = useMeterBaseUrl ? this.meterBaseUrl : this.baseUrl;
+        const url = new URL(endpoint, baseUrl);
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
                 url.searchParams.append(key, value);

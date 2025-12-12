@@ -9,13 +9,14 @@ import {
   UsageEventRequest,
   UsageEventResponse, CustomerGetRequest, CustomerDetailsRequest, CustomerDetailsResponse,
 } from "./interface";
+import { METER_BASE_URL } from "./constants";
 
 export async function fetchAccess(
   baseUrl: string,
   apiKey: string,
   request: AccessCheckRequest
 ): Promise<AccessResponse> {
-  const url = new URL("usage/access", baseUrl);
+  const url = new URL("usage/access", METER_BASE_URL);
   url.searchParams.append("feature_key", request.featureKey);
   url.searchParams.append("customer_key", request.customerKey);
 
@@ -34,16 +35,36 @@ export async function fetchUsage(
   apiKey: string,
   request: UsageEventRequest
 ): Promise<UsageEventResponse> {
-  const url = new URL("usage/events", baseUrl);
+  const url = new URL("usage/events", METER_BASE_URL);
+
+  const body: any = {
+    customer_key: request.customerKey,
+    event_id: request.eventId,
+    amount: request.amount ?? 1,
+  };
+
+  // Use either event_name or feature_key
+  if (request.eventName) {
+    body.event_name = request.eventName;
+  } else if (request.featureKey) {
+    body.feature_key = request.featureKey;
+  }
+
+  // Add optional fields if they are provided
+  if (request.creditUsed !== undefined) {
+    body.credit_used = request.creditUsed;
+  }
+  if (request.timestamp !== undefined) {
+    body.timestamp = request.timestamp;
+  }
+  if (request.metadata !== undefined) {
+    body.metadata = request.metadata;
+  }
 
   const response = await fetch(url.toString(), {
     method: "POST",
     headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      customer_key: request.customerKey,
-      event_name: request.eventName,
-      amount: request.amount ?? 1,
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) throw new Error("Failed to record usage");

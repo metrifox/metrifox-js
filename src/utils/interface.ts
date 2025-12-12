@@ -32,7 +32,7 @@ export interface UsageEventRequest {
   eventName?: string; // Either eventName or featureKey is required
   featureKey?: string; // Either eventName or featureKey is required
   eventId: string; // Required for idempotency
-  amount?: number; // Optional, defaults to 1
+  quantity?: number; // Optional, defaults to 1
   creditUsed?: number; // Optional
   timestamp?: number; // Optional
   metadata?: Record<string, any>; // Optional, defaults to {}

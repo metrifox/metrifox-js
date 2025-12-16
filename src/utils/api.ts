@@ -40,7 +40,7 @@ export async function fetchUsage(
   const body: any = {
     customer_key: request.customerKey,
     event_id: request.eventId,
-    amount: request.amount ?? 1,
+    quantity: request.quantity ?? 1,
   };
 
   // Use either event_name or feature_key

@@ -21,6 +21,10 @@ The official JavaScript library for the Metrifox platform. Build and scale usage
 - [Checkout & Billing](#checkout--billing)
   - [Embed Checkout Pages](#embed-checkout-pages)
   - [Generate Checkout url](#generate-checkout-url)
+- [Subscription Management](#subscription-management)
+  - [Billing History](#billing-history)
+  - [Entitlements Summary](#entitlements-summary)
+  - [Entitlements Usage](#entitlements-usage)
 - [Framework Integration](#framework-integration)
   - [React/Vite](#reactvite)
   - [Next.js](#nextjs)
@@ -462,6 +466,39 @@ If you're configuring your own pricing page, the above example should be suffici
   };
 ```
 
+## Subscription Management
+
+Retrieve billing and entitlement data for subscriptions.
+
+### Billing History
+
+Get the complete billing history for a subscription, including invoices, credit notes, and payment statuses:
+
+```javascript
+const client = window.metrifoxClient; // or your stored client instance
+
+const history = await client.subscriptions.getBillingHistory("subscription_uuid");
+console.log("Invoices:", history.data);
+```
+
+### Entitlements Summary
+
+Get the full entitlements summary for a subscription, including configuration, allowances, and carryover settings:
+
+```javascript
+const summary = await client.subscriptions.getEntitlementsSummary("subscription_uuid");
+console.log("Entitlements:", summary.data);
+```
+
+### Entitlements Usage
+
+Get the entitlements usage breakdown for a subscription, including purchased, included, pay-as-you-go, and rollover pools:
+
+```javascript
+const usage = await client.subscriptions.getEntitlementsUsage("subscription_uuid");
+console.log("Usage breakdown:", usage.data);
+```
+
 ## Framework Integration
 
 The usage is identical across all frameworks. Only initialization differs:
@@ -560,6 +597,7 @@ const client = init(config);
 client.usages; // Usage tracking and access control
 client.customers; // Customer management
 client.checkout; // Embedded checkout
+client.subscriptions; // Subscription billing & entitlements
 ```
 
 ### Functions
@@ -586,6 +624,13 @@ client.checkout; // Embedded checkout
 **Checkout Module (`client.checkout`):**
 
 - `embed(config)` - Embed checkout pages in your application
+- `url(config)` - Generate a checkout URL
+
+**Subscriptions Module (`client.subscriptions`):**
+
+- `getBillingHistory(subscriptionId)` - Get billing history for a subscription
+- `getEntitlementsSummary(subscriptionId)` - Get entitlements summary for a subscription
+- `getEntitlementsUsage(subscriptionId)` - Get entitlements usage breakdown for a subscription
 
 ### Types
 

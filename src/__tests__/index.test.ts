@@ -538,6 +538,130 @@ describe("Metrifox SDK", () => {
       expect(typeof client.checkout.embed).toBe('function');
       expect(typeof client.checkout.url).toBe('function');
     });
+
+    it("should have subscriptions module for subscription management", async () => {
+      expect(client.subscriptions).toBeDefined();
+      expect(typeof client.subscriptions.getBillingHistory).toBe('function');
+      expect(typeof client.subscriptions.getEntitlementsSummary).toBe('function');
+      expect(typeof client.subscriptions.getEntitlementsUsage).toBe('function');
+    });
+  });
+
+  describe("subscriptions", () => {
+    it("should fetch billing history for a subscription", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        message: "Billing history fetched successfully",
+        data: [
+          {
+            invoice_id: "inv_001",
+            amount: 9900,
+            currency: "USD",
+            status: "paid",
+          },
+        ],
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.subscriptions.getBillingHistory("sub_uuid_123");
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/subscriptions/sub_uuid_123/billing-history",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      expect(result).toEqual(mockResponse);
+    });
+
+    it("should fetch entitlements summary for a subscription", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        message: "Entitlements summary fetched successfully",
+        data: [
+          {
+            feature_key: "api_calls",
+            allowance: 10000,
+            used: 3500,
+          },
+        ],
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.subscriptions.getEntitlementsSummary("sub_uuid_123");
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/subscriptions/sub_uuid_123/v2/entitlements-summary",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      expect(result).toEqual(mockResponse);
+    });
+
+    it("should fetch entitlements usage for a subscription", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        message: "Entitlements usage fetched successfully",
+        data: [
+          {
+            feature_key: "api_calls",
+            purchased: 10000,
+            used: 3500,
+          },
+        ],
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.subscriptions.getEntitlementsUsage("sub_uuid_123");
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/subscriptions/sub_uuid_123/v2/entitlements-usage",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      expect(result).toEqual(mockResponse);
+    });
+
+    it("should throw error on failed billing history fetch", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+      });
+
+      await expect(
+        client.subscriptions.getBillingHistory("invalid-sub-id")
+      ).rejects.toThrow("Request failed: 404 Not Found");
+    });
   });
 
   describe("checkout.url", () => {

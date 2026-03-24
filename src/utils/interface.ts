@@ -374,6 +374,50 @@ export interface CustomerCSVSyncResponse {
   meta?: any;
 }
 
+export interface BulkCreateCustomersRequest {
+  customers: CustomerCreateRequest[];
+}
+
+export interface BulkCreateCustomersResponse {
+  statusCode: number;
+  message?: string;
+  data: {
+    total: number;
+    successful_count: number;
+    failed_count: number;
+    customers_created: Array<{
+      index: number;
+      customer_key: string;
+      data: {
+        id: string;
+        customer_type: string;
+        primary_email: string;
+        display_name: string | null;
+      };
+    }>;
+    customers_failed: Array<{
+      index: number;
+      customer_key: string;
+      error: string;
+    }>;
+  };
+  errors?: any;
+  meta?: any;
+}
+
+export interface BulkAssignPlanRequest {
+  customer_keys: string[];
+  plan_key: string;
+  billing_interval?: string;
+  currency_code?: string;
+  items?: Array<{
+    feature_key?: string;
+    credit_key?: string;
+    quantity: number;
+  }>;
+  skip_invoice?: boolean;
+}
+
 export interface APIResponse {
   statusCode: number;
   message?: string;

@@ -368,6 +368,37 @@ const client = window.metrifoxClient;
 const response = await client.customers.delete("customer_key_to_delete");
 ```
 
+### Bulk Create Customers
+
+Create multiple customers in a single API call:
+
+```javascript
+const client = window.metrifoxClient;
+
+const result = await client.customers.bulkCreate({
+  customers: [
+    {
+      customer_key: "customer_001",
+      customer_type: "BUSINESS",
+      primary_email: "contact@acme.com",
+      legal_name: "Acme Corp",
+      display_name: "Acme",
+    },
+    {
+      customer_key: "customer_002",
+      customer_type: "INDIVIDUAL",
+      primary_email: "jane@example.com",
+      first_name: "Jane",
+      last_name: "Doe",
+    },
+  ],
+});
+
+console.log(`Total: ${result.data.total}`);
+console.log(`Successful: ${result.data.successful_count}`);
+console.log(`Failed: ${result.data.failed_count}`);
+```
+
 ### Bulk Customer Import (CSV)
 
 Upload multiple customers at once using a CSV file:
@@ -499,6 +530,27 @@ const usage = await client.subscriptions.getEntitlementsUsage("subscription_uuid
 console.log("Usage breakdown:", usage.data);
 ```
 
+### Bulk Assign Plan
+
+Assign a plan to multiple customers at once:
+
+```javascript
+const result = await client.subscriptions.bulkAssignPlan({
+  customer_keys: ["customer_001", "customer_002"],
+  plan_key: "pro-plan",
+  billing_interval: "monthly", // optional
+  currency_code: "USD", // optional
+  items: [
+    // optional: credit/feature quantities
+    { credit_key: "api_credits", quantity: 500 },
+  ],
+  skip_invoice: false, // optional
+});
+
+console.log("Succeeded:", result.data.succeeded.length);
+console.log("Failed:", result.data.failed.length);
+```
+
 ## Framework Integration
 
 The usage is identical across all frameworks. Only initialization differs:
@@ -620,6 +672,7 @@ client.subscriptions; // Subscription billing & entitlements
 - `delete(customerKey)` - Delete a customer
 - `getDetails(customerKey)` - Get detailed customer information
 - `uploadCsv(file)` - Upload a CSV list of customers
+- `bulkCreate(request)` - Create multiple customers at once
 
 **Checkout Module (`client.checkout`):**
 
@@ -631,6 +684,7 @@ client.subscriptions; // Subscription billing & entitlements
 - `getBillingHistory(subscriptionId)` - Get billing history for a subscription
 - `getEntitlementsSummary(subscriptionId)` - Get entitlements summary for a subscription
 - `getEntitlementsUsage(subscriptionId)` - Get entitlements usage breakdown for a subscription
+- `bulkAssignPlan(request)` - Assign a plan to multiple customers at once
 
 ### Types
 

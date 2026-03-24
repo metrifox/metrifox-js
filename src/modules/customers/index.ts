@@ -6,7 +6,9 @@ import {
     CustomerListResponse,
     APIResponse,
     CustomerDetailsResponse,
-    CustomerCSVSyncResponse
+    CustomerCSVSyncResponse,
+    BulkCreateCustomersRequest,
+    BulkCreateCustomersResponse
 } from "../../utils/interface";
 
 export class CustomersModule extends BaseClient {
@@ -61,6 +63,13 @@ export class CustomersModule extends BaseClient {
             method: "POST",
             body: formData,
             isFormData: true
+        });
+    }
+
+    async bulkCreate(request: BulkCreateCustomersRequest): Promise<BulkCreateCustomersResponse> {
+        return this.makeRequest("customers/bulk-create", {
+            method: "POST",
+            body: request
         });
     }
 

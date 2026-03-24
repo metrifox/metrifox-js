@@ -531,6 +531,7 @@ describe("Metrifox SDK", () => {
       expect(typeof client.customers.list).toBe('function');
       expect(typeof client.customers.get).toBe('function');
       expect(typeof client.customers.delete).toBe('function');
+      expect(typeof client.customers.bulkCreate).toBe('function');
     });
 
     it("should have checkout module for billing", async () => {
@@ -544,6 +545,7 @@ describe("Metrifox SDK", () => {
       expect(typeof client.subscriptions.getBillingHistory).toBe('function');
       expect(typeof client.subscriptions.getEntitlementsSummary).toBe('function');
       expect(typeof client.subscriptions.getEntitlementsUsage).toBe('function');
+      expect(typeof client.subscriptions.bulkAssignPlan).toBe('function');
     });
   });
 
@@ -661,6 +663,321 @@ describe("Metrifox SDK", () => {
       await expect(
         client.subscriptions.getBillingHistory("invalid-sub-id")
       ).rejects.toThrow("Request failed: 404 Not Found");
+    });
+  });
+
+  describe("customers.bulkCreate", () => {
+    it("should make correct API call for bulk customer creation", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        message: "Bulk Customer Creation Completed",
+        meta: {},
+        data: {
+          total: 2,
+          successful_count: 2,
+          failed_count: 0,
+          customers_created: [
+            {
+              index: 0,
+              customer_key: "acme_corp_001",
+              data: {
+                id: "764c80e3-ed59-44a5-ba07-7ee5ba547774",
+                customer_type: "BUSINESS",
+                primary_email: "contact@acmecorp.com",
+                display_name: "Acme Corp"
+              }
+            },
+            {
+              index: 1,
+              customer_key: "jane_doe_001",
+              data: {
+                id: "864c80e3-ed59-44a5-ba07-7ee5ba547775",
+                customer_type: "INDIVIDUAL",
+                primary_email: "jane@example.com",
+                display_name: "Jane Doe"
+              }
+            }
+          ],
+          customers_failed: []
+        },
+        errors: {}
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.customers.bulkCreate({
+        customers: [
+          {
+            customer_type: "BUSINESS",
+            customer_key: "acme_corp_001",
+            primary_email: "contact@acmecorp.com",
+            legal_name: "Acme Corporation",
+            display_name: "Acme Corp"
+          },
+          {
+            customer_type: "INDIVIDUAL",
+            customer_key: "jane_doe_001",
+            primary_email: "jane@example.com",
+            first_name: "Jane",
+            last_name: "Doe"
+          }
+        ]
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/customers/bulk-create",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            customers: [
+              {
+                customer_type: "BUSINESS",
+                customer_key: "acme_corp_001",
+                primary_email: "contact@acmecorp.com",
+                legal_name: "Acme Corporation",
+                display_name: "Acme Corp"
+              },
+              {
+                customer_type: "INDIVIDUAL",
+                customer_key: "jane_doe_001",
+                primary_email: "jane@example.com",
+                first_name: "Jane",
+                last_name: "Doe"
+              }
+            ]
+          }),
+        }
+      );
+
+      expect(result).toEqual(mockResponse);
+      expect(result.data.successful_count).toBe(2);
+      expect(result.data.failed_count).toBe(0);
+      expect(result.data.customers_created).toHaveLength(2);
+    });
+
+    it("should handle partial failures in bulk creation", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        message: "Bulk Customer Creation Completed",
+        meta: {},
+        data: {
+          total: 2,
+          successful_count: 1,
+          failed_count: 1,
+          customers_created: [
+            {
+              index: 0,
+              customer_key: "acme_corp_001",
+              data: {
+                id: "764c80e3-ed59-44a5-ba07-7ee5ba547774",
+                customer_type: "BUSINESS",
+                primary_email: "contact@acmecorp.com",
+                display_name: "Acme Corp"
+              }
+            }
+          ],
+          customers_failed: [
+            {
+              index: 1,
+              customer_key: "jane_doe_001",
+              error: "Primary email has already been used"
+            }
+          ]
+        },
+        errors: {}
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.customers.bulkCreate({
+        customers: [
+          {
+            customer_type: "BUSINESS",
+            customer_key: "acme_corp_001",
+            primary_email: "contact@acmecorp.com",
+            legal_name: "Acme Corporation",
+            display_name: "Acme Corp"
+          },
+          {
+            customer_type: "INDIVIDUAL",
+            customer_key: "jane_doe_001",
+            primary_email: "jane@example.com",
+            first_name: "Jane",
+            last_name: "Doe"
+          }
+        ]
+      });
+
+      expect(result.data.successful_count).toBe(1);
+      expect(result.data.failed_count).toBe(1);
+      expect(result.data.customers_failed[0].error).toBe("Primary email has already been used");
+    });
+
+    it("should throw error on failed bulk creation request", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        statusText: "Bad Request",
+      });
+
+      await expect(
+        client.customers.bulkCreate({
+          customers: []
+        })
+      ).rejects.toThrow("Request failed: 400 Bad Request");
+    });
+  });
+
+  describe("subscriptions.bulkAssignPlan", () => {
+    it("should make correct API call for bulk plan assignment", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        message: "Bulk Plan Assignment Completed",
+        meta: {},
+        data: {
+          succeeded: [
+            { customer_key: "cust_001", subscription_id: "sub_001" },
+            { customer_key: "cust_002", subscription_id: "sub_002" }
+          ],
+          failed: []
+        },
+        errors: {}
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.subscriptions.bulkAssignPlan({
+        customer_keys: ["cust_001", "cust_002"],
+        plan_key: "pro-plan",
+        billing_interval: "monthly"
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/subscriptions/bulk-assign-plan",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            customer_keys: ["cust_001", "cust_002"],
+            plan_key: "pro-plan",
+            billing_interval: "monthly"
+          }),
+        }
+      );
+
+      expect(result).toEqual(mockResponse);
+      expect(result.data.succeeded).toHaveLength(2);
+      expect(result.data.failed).toHaveLength(0);
+    });
+
+    it("should make correct API call with all optional parameters", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        message: "Bulk Plan Assignment Completed",
+        meta: {},
+        data: {
+          succeeded: [{ customer_key: "cust_001", subscription_id: "sub_001" }],
+          failed: []
+        },
+        errors: {}
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.subscriptions.bulkAssignPlan({
+        customer_keys: ["cust_001"],
+        plan_key: "pro-plan",
+        billing_interval: "yearly",
+        currency_code: "EUR",
+        items: [{ feature_key: "api_calls", quantity: 10000 }],
+        skip_invoice: true
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/subscriptions/bulk-assign-plan",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            customer_keys: ["cust_001"],
+            plan_key: "pro-plan",
+            billing_interval: "yearly",
+            currency_code: "EUR",
+            items: [{ feature_key: "api_calls", quantity: 10000 }],
+            skip_invoice: true
+          }),
+        }
+      );
+
+      expect(result).toEqual(mockResponse);
+    });
+
+    it("should handle partial failures in bulk plan assignment", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        message: "Bulk Plan Assignment Completed",
+        meta: {},
+        data: {
+          succeeded: [
+            { customer_key: "cust_001", subscription_id: "sub_001" }
+          ],
+          failed: [
+            { customer_key: "cust_002", error: "Customer already has an active subscription" }
+          ]
+        },
+        errors: {}
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.subscriptions.bulkAssignPlan({
+        customer_keys: ["cust_001", "cust_002"],
+        plan_key: "pro-plan"
+      });
+
+      expect(result.data.succeeded).toHaveLength(1);
+      expect(result.data.failed).toHaveLength(1);
+      expect(result.data.failed[0].error).toBe("Customer already has an active subscription");
+    });
+
+    it("should throw error on failed bulk plan assignment request", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        statusText: "Unauthorized",
+      });
+
+      await expect(
+        client.subscriptions.bulkAssignPlan({
+          customer_keys: ["cust_001"],
+          plan_key: "pro-plan"
+        })
+      ).rejects.toThrow("Request failed: 401 Unauthorized");
     });
   });
 

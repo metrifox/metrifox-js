@@ -1,0 +1,31 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "cron"
+      cron: "0 0 * * 2" # 4:00 AM Tue
+    open-pull-requests-limit: 5
+    # Grouping prevents 10 separate PRs for 'react', 'react-dom', etc.
+    groups:
+      react-ecosystem:
+        patterns:
+          - "react*"
+          - "@types/react*"
+      testing-tools:
+        patterns:
+          - "jest*"
+          - "@testing-library*"
+      metrifox-internal:
+        patterns:
+          - "@metrifox/*" # Helps if your SDKs depend on each other
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "cron"
+      cron: "0 4 * * 2"
+    groups:
+      actions:
+        patterns:
+          - "*"

@@ -1,7 +1,7 @@
 version: 2
 
 updates:
-  # npm dependencies (including vulnerability updates)
+  # This covers npm, yarn, and pnpm automatically based on your lockfile
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -22,7 +22,7 @@ updates:
           - "jest*"
           - "@testing-library*"
 
-      # For internal Metrifox packages 
+      # For internal Metrifox packages
       metrifox-internal:
         patterns:
           - "@metrifox/*"
@@ -39,8 +39,9 @@ updates:
     schedule:
       interval: "weekly"
       day: "tuesday"
-      time: "04:00"  
+      time: "04:00"
     groups:
+      # Group all GitHub Actions updates into one PR
       actions:
         patterns:
-          - "*"                  # Group all Actions updates into one PR
+          - "*"

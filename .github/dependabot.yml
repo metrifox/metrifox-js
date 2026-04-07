@@ -22,7 +22,7 @@ updates:
           - "jest*"
           - "@testing-library*"
 
-      # Your internal Metrifox packages (helps when SDKs depend on each other)
+      # For internal Metrifox packages 
       metrifox-internal:
         patterns:
           - "@metrifox/*"

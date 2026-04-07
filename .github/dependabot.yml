@@ -5,8 +5,9 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "cron"
-      cron: "0 4 * * 2"        # Every Tuesday at 4:00 AM UTC
+      interval: "weekly"
+      day: "tuesday"
+      time: "04:00"
     open-pull-requests-limit: 10  
     groups:
       # Group React ecosystem together
@@ -36,8 +37,9 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "cron"
-      cron: "0 4 * * 2"        # Same time as npm for consistency
+      interval: "weekly"
+      day: "tuesday"
+      time: "04:00"  
     groups:
       actions:
         patterns:

@@ -1,31 +1,44 @@
 version: 2
+
 updates:
+  # npm dependencies (including vulnerability updates)
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "cron"
-      cron: "0 0 * * 2" # 4:00 AM Tue
-    open-pull-requests-limit: 5
-    # Grouping prevents 10 separate PRs for 'react', 'react-dom', etc.
+      cron: "0 4 * * 2"        # Every Tuesday at 4:00 AM UTC
+    open-pull-requests-limit: 10  
     groups:
+      # Group React ecosystem together
       react-ecosystem:
         patterns:
           - "react*"
           - "@types/react*"
+
+      # Testing tools
       testing-tools:
         patterns:
           - "jest*"
           - "@testing-library*"
+
+      # Your internal Metrifox packages (helps when SDKs depend on each other)
       metrifox-internal:
         patterns:
-          - "@metrifox/*" # Helps if your SDKs depend on each other
+          - "@metrifox/*"
 
+      # Group all minor/patch updates together to reduce PR noise
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # GitHub Actions workflows
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "cron"
-      cron: "0 4 * * 2"
+      cron: "0 4 * * 2"        # Same time as npm for consistency
     groups:
       actions:
         patterns:
-          - "*"
+          - "*"                  # Group all Actions updates into one PR

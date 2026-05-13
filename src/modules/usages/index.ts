@@ -2,6 +2,8 @@ import { BaseClient } from "../../core/base_client";
 import {
     AccessCheckRequest,
     AccessResponse,
+    ListUsageEventsParams,
+    UsageEventListResponse,
     UsageEventRequest,
     UsageEventResponse
 } from "../../utils/interface";
@@ -45,6 +47,20 @@ export class UsagesModule extends BaseClient {
         return this.makeRequest("usage/events", {
             method: "POST",
             body,
+            useMeterBaseUrl: true
+        });
+    }
+
+    async listEvents(params: ListUsageEventsParams = {}): Promise<UsageEventListResponse> {
+        const queryParams: Record<string, string> = {};
+        if (params.customerKey) queryParams.customer_key = params.customerKey;
+        if (params.featureKey) queryParams.feature_key = params.featureKey;
+        if (params.page !== undefined) queryParams.page = params.page.toString();
+        if (params.perPage !== undefined) queryParams.per_page = params.perPage.toString();
+
+        return this.makeRequest("usage/events", {
+            method: "GET",
+            params: queryParams,
             useMeterBaseUrl: true
         });
     }

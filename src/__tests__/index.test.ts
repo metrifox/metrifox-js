@@ -547,6 +547,23 @@ describe("Metrifox SDK", () => {
       expect(typeof client.subscriptions.getEntitlementsUsage).toBe('function');
       expect(typeof client.subscriptions.bulkAssignPlan).toBe('function');
     });
+
+    it("should have wallets module for credit management", async () => {
+      expect(client.wallets).toBeDefined();
+      expect(typeof client.wallets.list).toBe('function');
+      expect(typeof client.wallets.listCreditAllocations).toBe('function');
+      expect(typeof client.wallets.getCreditAllocation).toBe('function');
+    });
+
+    it("should expose new customer archive methods", async () => {
+      expect(typeof client.customers.archive).toBe('function');
+      expect(typeof client.customers.unarchive).toBe('function');
+    });
+
+    it("should expose new checkout cardCollectionUrl and usages listEvents", async () => {
+      expect(typeof client.checkout.cardCollectionUrl).toBe('function');
+      expect(typeof client.usages.listEvents).toBe('function');
+    });
   });
 
   describe("subscriptions", () => {
@@ -1056,6 +1073,399 @@ describe("Metrifox SDK", () => {
           offeringKey: "test-offering",
         })
       ).rejects.toThrow("Request failed: 400 Bad Request");
+    });
+  });
+
+  describe("customers.archive / unarchive", () => {
+    it("should archive a customer", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        message: "Customer Archived",
+        data: { customer_key: "cust_123", archived_at: "2026-05-05T14:30:00Z" },
+        errors: {},
+        meta: {},
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.customers.archive("cust_123");
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/customers/cust_123/archive",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse);
+    });
+
+    it("should unarchive a customer", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        message: "Customer Unarchived",
+        data: { customer_key: "cust_123", archived_at: null },
+        errors: {},
+        meta: {},
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.customers.unarchive("cust_123");
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/customers/cust_123/unarchive",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      expect(result.data.archived_at).toBeNull();
+    });
+
+    it("should throw on archive failure", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+      });
+
+      await expect(client.customers.archive("missing")).rejects.toThrow(
+        "Request failed: 404 Not Found"
+      );
+    });
+  });
+
+  describe("checkout.cardCollectionUrl", () => {
+    it("should generate a card collection URL for a subscription", async () => {
+      const mockResponse = {
+        data: {
+          checkout_url: "https://app.metrifox.com/test/card-collection/abc123",
+        },
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.checkout.cardCollectionUrl({
+        subscriptionId: "sub_uuid_123",
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/checkout/generate-card-collection-url?subscription_id=sub_uuid_123",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      expect(result).toEqual(mockResponse.data.checkout_url);
+    });
+
+    it("should generate a card collection URL for an order", async () => {
+      const mockResponse = {
+        data: {
+          checkout_url: "https://app.metrifox.com/test/card-collection/order456",
+        },
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.checkout.cardCollectionUrl({
+        orderId: "order_uuid_456",
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/checkout/generate-card-collection-url?order_id=order_uuid_456",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      expect(result).toEqual(mockResponse.data.checkout_url);
+    });
+
+    it("should throw when neither subscriptionId nor orderId is provided", async () => {
+      await expect(client.checkout.cardCollectionUrl({})).rejects.toThrow(
+        "Either subscriptionId or orderId is required"
+      );
+      expect(fetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("usages.listEvents", () => {
+    const mockResponse = {
+      data: [
+        {
+          id: "evt_uuid_1",
+          event_id: "client_event_1",
+          customer_key: "cust_123",
+          feature_key: "feature_seats",
+          quantity: 1,
+          timestamp: 1714922200000,
+          metadata: {},
+        },
+      ],
+      meta: {
+        current_page: 1,
+        prev_page: null,
+        next_page: null,
+        total_count: 1,
+        total_pages: 1,
+        per_page: 25,
+      },
+    };
+
+    it("should list usage events with no filters", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.usages.listEvents();
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api-meter.metrifox.com/api/v1/usage/events",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse);
+    });
+
+    it("should list usage events with filters and pagination", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      await client.usages.listEvents({
+        customerKey: "cust_123",
+        featureKey: "feature_seats",
+        page: 2,
+        perPage: 50,
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api-meter.metrifox.com/api/v1/usage/events?customer_key=cust_123&feature_key=feature_seats&page=2&per_page=50",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    });
+
+    it("should throw on failed list", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        statusText: "Internal Server Error",
+      });
+
+      await expect(client.usages.listEvents()).rejects.toThrow(
+        "Request failed: 500 Internal Server Error"
+      );
+    });
+  });
+
+  describe("wallets", () => {
+    it("should list wallets for a customer", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        data: [
+          {
+            id: "wallet_uuid_123",
+            name: "API Credits",
+            credit_unit_singular: "credit",
+            credit_unit_plural: "credits",
+            credit_system_id: "cs_uuid_1",
+            balance: 100,
+            credit_key: "api_credits",
+            customer_key: "cust_123",
+          },
+        ],
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.wallets.list("cust_123");
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/credit_systems/v2/wallets?customer_key=cust_123",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      expect(result.data[0].id).toBe("wallet_uuid_123");
+    });
+
+    it("should list credit allocations for a wallet", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        data: [
+          {
+            id: "alloc_uuid_1",
+            amount: 50,
+            consumed: 10,
+            created_at: "2026-05-01T10:00:00Z",
+            allocation_type: "purchased",
+            transactions: [],
+          },
+        ],
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      await client.wallets.listCreditAllocations("wallet_uuid_123");
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/credit_systems/v2/wallets/wallet_uuid_123/credit-allocations",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    });
+
+    it("should list credit allocations filtered by status", async () => {
+      const mockResponse = { statusCode: 200, data: [] };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      await client.wallets.listCreditAllocations("wallet_uuid_123", {
+        status: "active",
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/credit_systems/v2/wallets/wallet_uuid_123/credit-allocations?status=active",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    });
+
+    it("should get a single credit allocation", async () => {
+      const mockResponse = {
+        statusCode: 200,
+        data: {
+          id: "alloc_uuid_1",
+          amount: 100,
+          consumed: 25,
+          created_at: "2026-05-01T10:00:00Z",
+          allocation_type: "purchased",
+          transactions: [
+            {
+              id: "txn_1",
+              amount: 25,
+              created_at: "2026-05-02T11:00:00Z",
+              quantity: 25,
+            },
+          ],
+        },
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.wallets.getCreditAllocation("alloc_uuid_1");
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/credit_systems/v2/credit-allocations/alloc_uuid_1",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      expect(result.data.transactions).toHaveLength(1);
+    });
+
+    it("should throw on wallet list failure", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        statusText: "Internal Server Error",
+      });
+
+      await expect(client.wallets.list("cust_123")).rejects.toThrow(
+        "Request failed: 500 Internal Server Error"
+      );
+    });
+  });
+
+  describe("meterServiceBaseUrl override", () => {
+    it("should use custom meter service base URL when provided", async () => {
+      const customClient = init({
+        apiKey: "test-key",
+        meterServiceBaseUrl: "https://meter.staging.metrifox.com/api/v1/",
+      });
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [], meta: {} }),
+      });
+
+      await customClient.usages.listEvents();
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://meter.staging.metrifox.com/api/v1/usage/events",
+        expect.any(Object)
+      );
     });
   });
 });

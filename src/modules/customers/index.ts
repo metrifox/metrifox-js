@@ -51,6 +51,18 @@ export class CustomersModule extends BaseClient {
         });
     }
 
+    async archive(customerKey: string): Promise<APIResponse> {
+        return this.makeRequest(`customers/${customerKey}/archive`, {
+            method: "POST"
+        });
+    }
+
+    async unarchive(customerKey: string): Promise<APIResponse> {
+        return this.makeRequest(`customers/${customerKey}/unarchive`, {
+            method: "POST"
+        });
+    }
+
     async getDetails(customerKey: string): Promise<CustomerDetailsResponse> {
         return this.makeRequest(`customers/${customerKey}/details`);
     }

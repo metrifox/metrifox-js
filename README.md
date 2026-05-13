@@ -28,6 +28,7 @@ The official JavaScript library for the Metrifox platform. Build and scale usage
   - [Entitlements Summary](#entitlements-summary)
   - [Entitlements Usage](#entitlements-usage)
 - [Usage Events](#usage-events)
+- [Compute Quantity Price](#compute-quantity-price)
 - [Wallets & Credit Allocations](#wallets--credit-allocations)
 - [Framework Integration](#framework-integration)
   - [React/Vite](#reactvite)
@@ -587,6 +588,32 @@ events.data.forEach((event) => {
 console.log(`Page ${events.meta.current_page} of ${events.meta.total_pages}`);
 ```
 
+## Compute Quantity Price
+
+Compute the price for a given quantity of a feature for a customer, based on their plan. Useful for previewing upgrade costs or showing customers the cost of additional usage before they commit.
+
+```javascript
+const client = window.metrifoxClient;
+
+const price = await client.usages.quantityPrice({
+  customerKey: "customer_key_123",
+  featureKey: "feature_interview_booking",
+  quantity: 500,
+});
+
+console.log(`${price.data.price} ${price.data.unit}`);
+
+// For tiered pricing, inspect the per-tier breakdown
+price.data.applied_tiers.forEach((tier) => {
+  console.log(
+    `  Tier ${tier.first_unit}-${tier.last_unit}: ` +
+    `${tier.units_consumed} units -> ${tier.tier_price}`
+  );
+});
+```
+
+> Only available to tenants whose plan includes the finance API feature.
+
 ## Wallets & Credit Allocations
 
 ```javascript
@@ -744,6 +771,7 @@ client.subscriptions; // Subscription billing & entitlements
 - `checkAccess(request)` - Check feature access for a customer
 - `recordUsage(request)` - Record a usage event
 - `listEvents(params?)` - List recorded usage events with optional filters and pagination
+- `quantityPrice(request)` - Compute the price for a given usage quantity (requires finance API feature)
 
 **Customers Module (`client.customers`):**
 

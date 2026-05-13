@@ -450,6 +450,42 @@ export interface ListUsageEventsParams {
   perPage?: number;
 }
 
+export interface QuantityPriceRequest {
+  customerKey: string;
+  featureKey: string;
+  quantity: number;
+}
+
+export interface AppliedTier {
+  first_unit: number;
+  last_unit: number;
+  pricing_model: string;
+  unit_price?: number | null;
+  package_price?: number | null;
+  package_size?: number | null;
+  flat_fee?: number | null;
+  min_price?: number | null;
+  max_price?: number | null;
+  percentage?: number | null;
+  total_unit_quantity?: number | null;
+  units_consumed: number;
+  tier_price: string;
+}
+
+export interface QuantityPriceResponseData {
+  customer_key: string;
+  feature_key: string;
+  quantity: number;
+  price: number;
+  unit: string;
+  applied_tiers: AppliedTier[];
+}
+
+export interface QuantityPriceResponse {
+  message?: string;
+  data: QuantityPriceResponseData;
+}
+
 export interface UsageEventListItem {
   id: string;
   event_id: string;

@@ -3,6 +3,8 @@ import {
     AccessCheckRequest,
     AccessResponse,
     ListUsageEventsParams,
+    QuantityPriceRequest,
+    QuantityPriceResponse,
     UsageEventListResponse,
     UsageEventRequest,
     UsageEventResponse
@@ -62,6 +64,17 @@ export class UsagesModule extends BaseClient {
             method: "GET",
             params: queryParams,
             useMeterBaseUrl: true
+        });
+    }
+
+    async quantityPrice(request: QuantityPriceRequest): Promise<QuantityPriceResponse> {
+        return this.makeRequest("usage/quantity-price", {
+            method: "GET",
+            params: {
+                customer_key: request.customerKey,
+                feature_key: request.featureKey,
+                quantity: request.quantity.toString(),
+            },
         });
     }
 }

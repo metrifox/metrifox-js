@@ -560,9 +560,10 @@ describe("Metrifox SDK", () => {
       expect(typeof client.customers.unarchive).toBe('function');
     });
 
-    it("should expose new checkout cardCollectionUrl and usages listEvents", async () => {
+    it("should expose new checkout cardCollectionUrl and usages listEvents/quantityPrice", async () => {
       expect(typeof client.checkout.cardCollectionUrl).toBe('function');
       expect(typeof client.usages.listEvents).toBe('function');
+      expect(typeof client.usages.quantityPrice).toBe('function');
     });
   });
 
@@ -1445,6 +1446,71 @@ describe("Metrifox SDK", () => {
       await expect(client.wallets.list("cust_123")).rejects.toThrow(
         "Request failed: 500 Internal Server Error"
       );
+    });
+  });
+
+  describe("usages.quantityPrice", () => {
+    it("should compute quantity price", async () => {
+      const mockResponse = {
+        message: "Quantity price fetched",
+        data: {
+          customer_key: "cust_123",
+          feature_key: "feature_interview_booking",
+          quantity: 500,
+          price: 3000.0,
+          unit: "USD",
+          applied_tiers: [
+            {
+              first_unit: 1,
+              last_unit: 500,
+              pricing_model: "per_unit",
+              unit_price: 6.0,
+              units_consumed: 500,
+              tier_price: "3000.0",
+            },
+          ],
+        },
+      };
+
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse),
+      });
+
+      const result = await client.usages.quantityPrice({
+        customerKey: "cust_123",
+        featureKey: "feature_interview_booking",
+        quantity: 500,
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.metrifox.com/api/v1/usage/quantity-price?customer_key=cust_123&feature_key=feature_interview_booking&quantity=500",
+        {
+          method: "GET",
+          headers: {
+            "x-api-key": "test-key",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      expect(result.data.price).toBe(3000.0);
+      expect(result.data.applied_tiers).toHaveLength(1);
+    });
+
+    it("should throw on quantity-price failure", async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 403,
+        statusText: "Forbidden",
+      });
+
+      await expect(
+        client.usages.quantityPrice({
+          customerKey: "cust_123",
+          featureKey: "feature_interview_booking",
+          quantity: 500,
+        })
+      ).rejects.toThrow("Request failed: 403 Forbidden");
     });
   });
 

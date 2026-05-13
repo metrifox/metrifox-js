@@ -65,7 +65,7 @@ describe("Metrifox SDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api-meter.metrifox.com/api/v1/usage/access?feature_key=test-feature&customer_key=test-customer",
+        "https://api-meter.metrifox.com/usage/access?feature_key=test-feature&customer_key=test-customer",
         {
           method: "GET",
           headers: {
@@ -118,7 +118,7 @@ describe("Metrifox SDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api-meter.metrifox.com/api/v1/usage/events",
+        "https://api-meter.metrifox.com/usage/events",
         {
           method: "POST",
           headers: {
@@ -163,7 +163,7 @@ describe("Metrifox SDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api-meter.metrifox.com/api/v1/usage/events",
+        "https://api-meter.metrifox.com/usage/events",
         {
           method: "POST",
           headers: {
@@ -209,7 +209,7 @@ describe("Metrifox SDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api-meter.metrifox.com/api/v1/usage/events",
+        "https://api-meter.metrifox.com/usage/events",
         {
           method: "POST",
           headers: {
@@ -254,7 +254,7 @@ describe("Metrifox SDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api-meter.metrifox.com/api/v1/usage/events",
+        "https://api-meter.metrifox.com/usage/events",
         {
           method: "POST",
           headers: {
@@ -297,7 +297,7 @@ describe("Metrifox SDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api-meter.metrifox.com/api/v1/usage/events",
+        "https://api-meter.metrifox.com/usage/events",
         {
           method: "POST",
           headers: {
@@ -1249,7 +1249,7 @@ describe("Metrifox SDK", () => {
       const result = await client.usages.listEvents();
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api-meter.metrifox.com/api/v1/usage/events",
+        "https://api-meter.metrifox.com/usage/events",
         {
           method: "GET",
           headers: {
@@ -1275,7 +1275,7 @@ describe("Metrifox SDK", () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://api-meter.metrifox.com/api/v1/usage/events?customer_key=cust_123&feature_key=feature_seats&page=2&per_page=50",
+        "https://api-meter.metrifox.com/usage/events?customer_key=cust_123&feature_key=feature_seats&page=2&per_page=50",
         {
           method: "GET",
           headers: {
@@ -1452,7 +1452,7 @@ describe("Metrifox SDK", () => {
     it("should use custom meter service base URL when provided", async () => {
       const customClient = init({
         apiKey: "test-key",
-        meterServiceBaseUrl: "https://meter.staging.metrifox.com/api/v1/",
+        meterServiceBaseUrl: "https://meter.staging.metrifox.com/",
       });
 
       (fetch as jest.Mock).mockResolvedValueOnce({
@@ -1463,7 +1463,7 @@ describe("Metrifox SDK", () => {
       await customClient.usages.listEvents();
 
       expect(fetch).toHaveBeenCalledWith(
-        "https://meter.staging.metrifox.com/api/v1/usage/events",
+        "https://meter.staging.metrifox.com/usage/events",
         expect.any(Object)
       );
     });

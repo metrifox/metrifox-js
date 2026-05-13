@@ -811,7 +811,7 @@ For complete type definitions, see the [TypeScript definitions](https://github.c
 - `apiKey` - Your Metrifox API key
 - `baseUrl` - Custom API base URL (optional, defaults to `https://api.metrifox.com/api/v1/`)
 - `webAppBaseUrl` - Custom web app base URL (optional, defaults to `https://app.metrifox.com`)
-- `meterServiceBaseUrl` - Custom meter service base URL (optional, defaults to `https://api-meter.metrifox.com/api/v1/`). Can also be set via the `METRIFOX_METER_SERVICE_BASE_URL` environment variable.
+- `meterServiceBaseUrl` - Custom meter service base URL (optional, defaults to `https://api-meter.metrifox.com/`). Can also be set via the `METRIFOX_METER_SERVICE_BASE_URL` environment variable.
 
 ### Environment URLs
 

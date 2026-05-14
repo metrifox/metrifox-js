@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-05-13
+
+### Added
+
+- `wallets` module with `list`, `listCreditAllocations`, and `getCreditAllocation` methods.
+- `customers.archive(customerKey)` and `customers.unarchive(customerKey)`.
+- `checkout.cardCollectionUrl({ subscriptionId?, orderId? })` for generating hosted card-collection URLs.
+- `usages.listEvents({ customerKey?, featureKey?, page?, perPage? })` to list recorded usage events with filters and pagination.
+- `usages.quantityPrice({ customerKey, featureKey, quantity })` to compute the price for a given usage quantity.
+- `meterServiceBaseUrl` config option (and `METRIFOX_METER_SERVICE_BASE_URL` env var) for overriding the meter service URL.
+
 ## [1.1.0] - 2025-10-03
 
 ### Added

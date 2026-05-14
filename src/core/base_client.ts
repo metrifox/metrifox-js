@@ -4,6 +4,7 @@ export interface MetrifoxConfig {
     apiKey?: string;
     baseUrl?: string;
     webAppBaseUrl?: string;
+    meterServiceBaseUrl?: string;
 }
 
 export class BaseClient {
@@ -15,7 +16,10 @@ export class BaseClient {
     constructor(config: MetrifoxConfig) {
         this.apiKey = config.apiKey || this.getApiKeyFromEnvironment();
         this.baseUrl = config.baseUrl || API_BASE_URL;
-        this.meterBaseUrl = METER_BASE_URL;
+        this.meterBaseUrl =
+            config.meterServiceBaseUrl ||
+            process?.env?.METRIFOX_METER_SERVICE_BASE_URL ||
+            METER_BASE_URL;
         this.webBaseUrl = config.webAppBaseUrl || WEB_BASE_URL;
 
         if (!this.apiKey) throw new Error("API key required");

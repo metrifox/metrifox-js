@@ -17,14 +17,19 @@ The official JavaScript library for the Metrifox platform. Build and scale usage
   - [Updating Customers](#updating-customers)
   - [Getting Customer Data](#getting-customer-data)
   - [Deleting Customers](#deleting-customers)
+  - [Archiving Customers](#archiving-customers)
   - [Bulk Customer Import (CSV)](#bulk-customer-import-csv)
 - [Checkout & Billing](#checkout--billing)
   - [Embed Checkout Pages](#embed-checkout-pages)
   - [Generate Checkout url](#generate-checkout-url)
+  - [Card Collection URL](#card-collection-url)
 - [Subscription Management](#subscription-management)
   - [Billing History](#billing-history)
   - [Entitlements Summary](#entitlements-summary)
   - [Entitlements Usage](#entitlements-usage)
+- [Usage Events](#usage-events)
+- [Compute Quantity Price](#compute-quantity-price)
+- [Wallets & Credit Allocations](#wallets--credit-allocations)
 - [Framework Integration](#framework-integration)
   - [React/Vite](#reactvite)
   - [Next.js](#nextjs)
@@ -368,6 +373,20 @@ const client = window.metrifoxClient;
 const response = await client.customers.delete("customer_key_to_delete");
 ```
 
+### Archiving Customers
+
+Archive or restore a customer without deleting their data:
+
+```javascript
+const client = window.metrifoxClient;
+
+// Archive a customer
+await client.customers.archive("customer_key_123");
+
+// Restore an archived customer
+await client.customers.unarchive("customer_key_123");
+```
+
 ### Bulk Create Customers
 
 Create multiple customers in a single API call:
@@ -465,6 +484,24 @@ If you're configuring your own pricing page, the above example should be suffici
 - After verifying the customer, retrieve the `customer_key` which is the unique identifier of the customer on your platform, and use it along with the extracted parameters to generate a checkout URL. (Remember to sync your new customer with Metrifox using `customer.create` from the sdk)
 - Redirect the customer to the generated URL so they can complete their order.
 
+### Card Collection URL
+
+Generate a hosted URL for collecting a payment method against an existing subscription or order:
+
+```javascript
+const client = window.metrifoxClient;
+
+// For a subscription
+const url = await client.checkout.cardCollectionUrl({
+  subscriptionId: "sub_uuid_123",
+});
+
+// For an order
+const url = await client.checkout.cardCollectionUrl({
+  orderId: "order_uuid_456",
+});
+```
+
 ```javascript
   const client = window.metrifoxClient; // or your stored client instance
 
@@ -528,6 +565,77 @@ Get the entitlements usage breakdown for a subscription, including purchased, in
 ```javascript
 const usage = await client.subscriptions.getEntitlementsUsage("subscription_uuid");
 console.log("Usage breakdown:", usage.data);
+```
+
+## Usage Events
+
+List recorded usage events, with optional filters and pagination:
+
+```javascript
+const client = window.metrifoxClient;
+
+const events = await client.usages.listEvents({
+  customerKey: "customer_key_123", // optional
+  featureKey: "feature_seats",     // optional
+  page: 1,                          // optional
+  perPage: 25,                      // optional
+});
+
+events.data.forEach((event) => {
+  console.log(`${event.feature_key}: ${event.quantity} at ${event.timestamp}`);
+});
+
+console.log(`Page ${events.meta.current_page} of ${events.meta.total_pages}`);
+```
+
+## Compute Quantity Price
+
+Compute the price for a given quantity of a feature for a customer, based on their plan. Useful for previewing upgrade costs or showing customers the cost of additional usage before they commit.
+
+```javascript
+const client = window.metrifoxClient;
+
+const price = await client.usages.quantityPrice({
+  customerKey: "customer_key_123",
+  featureKey: "feature_interview_booking",
+  quantity: 500,
+});
+
+console.log(`${price.data.price} ${price.data.unit}`);
+
+// For tiered pricing, inspect the per-tier breakdown
+price.data.applied_tiers.forEach((tier) => {
+  console.log(
+    `  Tier ${tier.first_unit}-${tier.last_unit}: ` +
+    `${tier.units_consumed} units -> ${tier.tier_price}`
+  );
+});
+```
+
+> Only available to tenants whose plan includes the finance API feature.
+
+## Wallets & Credit Allocations
+
+```javascript
+const client = window.metrifoxClient;
+
+// List wallets for a customer
+const wallets = await client.wallets.list("customer_key_123");
+wallets.data.forEach((w) =>
+  console.log(`${w.name}: ${w.balance} ${w.credit_unit_plural}`)
+);
+
+// List credit allocations for a wallet (optionally filter by status)
+const allocations = await client.wallets.listCreditAllocations("wallet_uuid_123");
+const active = await client.wallets.listCreditAllocations("wallet_uuid_123", {
+  status: "active",
+});
+
+// Get a single credit allocation with its transactions
+const allocation = await client.wallets.getCreditAllocation("alloc_uuid_123");
+allocation.data.transactions.forEach((txn) =>
+  console.log(`${txn.amount} at ${txn.created_at}`)
+);
 ```
 
 ### Bulk Assign Plan
@@ -662,6 +770,8 @@ client.subscriptions; // Subscription billing & entitlements
 
 - `checkAccess(request)` - Check feature access for a customer
 - `recordUsage(request)` - Record a usage event
+- `listEvents(params?)` - List recorded usage events with optional filters and pagination
+- `quantityPrice(request)` - Compute the price for a given usage quantity (requires finance API feature)
 
 **Customers Module (`client.customers`):**
 
@@ -670,6 +780,8 @@ client.subscriptions; // Subscription billing & entitlements
 - `list(params?)` - Get a paginated list of customers with optional filtering
 - `get(customerKey)` - Get a customer
 - `delete(customerKey)` - Delete a customer
+- `archive(customerKey)` - Archive a customer
+- `unarchive(customerKey)` - Restore an archived customer
 - `getDetails(customerKey)` - Get detailed customer information
 - `uploadCsv(file)` - Upload a CSV list of customers
 - `bulkCreate(request)` - Create multiple customers at once
@@ -678,6 +790,7 @@ client.subscriptions; // Subscription billing & entitlements
 
 - `embed(config)` - Embed checkout pages in your application
 - `url(config)` - Generate a checkout URL
+- `cardCollectionUrl(config)` - Generate a hosted card-collection URL for a subscription or order
 
 **Subscriptions Module (`client.subscriptions`):**
 
@@ -685,6 +798,12 @@ client.subscriptions; // Subscription billing & entitlements
 - `getEntitlementsSummary(subscriptionId)` - Get entitlements summary for a subscription
 - `getEntitlementsUsage(subscriptionId)` - Get entitlements usage breakdown for a subscription
 - `bulkAssignPlan(request)` - Assign a plan to multiple customers at once
+
+**Wallets Module (`client.wallets`):**
+
+- `list(customerKey)` - List credit wallets for a customer
+- `listCreditAllocations(walletId, { status? })` - List credit allocations for a wallet
+- `getCreditAllocation(allocationId)` - Get a single credit allocation with its transactions
 
 ### Types
 
@@ -719,6 +838,8 @@ For complete type definitions, see the [TypeScript definitions](https://github.c
 
 - `apiKey` - Your Metrifox API key
 - `baseUrl` - Custom API base URL (optional, defaults to `https://api.metrifox.com/api/v1/`)
+- `webAppBaseUrl` - Custom web app base URL (optional, defaults to `https://app.metrifox.com`)
+- `meterServiceBaseUrl` - Custom meter service base URL (optional, defaults to `https://api-meter.metrifox.com/`). Can also be set via the `METRIFOX_METER_SERVICE_BASE_URL` environment variable.
 
 ### Environment URLs
 

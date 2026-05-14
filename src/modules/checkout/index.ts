@@ -1,5 +1,5 @@
 import { BaseClient } from "../../core/base_client";
-import { CheckoutConfig, EmbedConfig } from "../../utils/interface";
+import { CardCollectionConfig, CheckoutConfig, EmbedConfig } from "../../utils/interface";
 import { createIframe } from "../../utils/embed-iframe";
 
 export class CheckoutModule extends BaseClient {
@@ -36,6 +36,23 @@ export class CheckoutModule extends BaseClient {
     }
 
     const response = await this.makeRequest("products/offerings/generate-checkout-url", {
+      method: "GET",
+      params,
+    });
+
+    return response?.data?.checkout_url;
+  }
+
+  async cardCollectionUrl(config: CardCollectionConfig): Promise<string> {
+    if (!config.subscriptionId && !config.orderId) {
+      throw new Error("Either subscriptionId or orderId is required");
+    }
+
+    const params: Record<string, string> = {};
+    if (config.subscriptionId) params.subscription_id = config.subscriptionId;
+    if (config.orderId) params.order_id = config.orderId;
+
+    const response = await this.makeRequest("checkout/generate-card-collection-url", {
       method: "GET",
       params,
     });

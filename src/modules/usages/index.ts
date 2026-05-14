@@ -2,6 +2,10 @@ import { BaseClient } from "../../core/base_client";
 import {
     AccessCheckRequest,
     AccessResponse,
+    ListUsageEventsParams,
+    QuantityPriceRequest,
+    QuantityPriceResponse,
+    UsageEventListResponse,
     UsageEventRequest,
     UsageEventResponse
 } from "../../utils/interface";
@@ -46,6 +50,31 @@ export class UsagesModule extends BaseClient {
             method: "POST",
             body,
             useMeterBaseUrl: true
+        });
+    }
+
+    async listEvents(params: ListUsageEventsParams = {}): Promise<UsageEventListResponse> {
+        const queryParams: Record<string, string> = {};
+        if (params.customerKey) queryParams.customer_key = params.customerKey;
+        if (params.featureKey) queryParams.feature_key = params.featureKey;
+        if (params.page !== undefined) queryParams.page = params.page.toString();
+        if (params.perPage !== undefined) queryParams.per_page = params.perPage.toString();
+
+        return this.makeRequest("usage/events", {
+            method: "GET",
+            params: queryParams,
+            useMeterBaseUrl: true
+        });
+    }
+
+    async quantityPrice(request: QuantityPriceRequest): Promise<QuantityPriceResponse> {
+        return this.makeRequest("usage/quantity-price", {
+            method: "GET",
+            params: {
+                customer_key: request.customerKey,
+                feature_key: request.featureKey,
+                quantity: request.quantity.toString(),
+            },
         });
     }
 }

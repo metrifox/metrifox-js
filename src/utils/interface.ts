@@ -2,6 +2,7 @@ export interface MetrifoxConfig {
   apiKey?: string;
   baseUrl?: string;
   webAppBaseUrl?: string;
+  meterServiceBaseUrl?: string;
 }
 
 export interface AccessCheckRequest {
@@ -435,4 +436,142 @@ export interface CheckoutConfig {
   offeringKey: string;
   billingInterval?: string;
   customerKey?: string;
+}
+
+export interface CardCollectionConfig {
+  subscriptionId?: string;
+  orderId?: string;
+}
+
+export interface ListUsageEventsParams {
+  customerKey?: string;
+  featureKey?: string;
+  page?: number;
+  perPage?: number;
+}
+
+export interface QuantityPriceRequest {
+  customerKey: string;
+  featureKey: string;
+  quantity: number;
+}
+
+export interface AppliedTier {
+  first_unit: number;
+  last_unit: number;
+  pricing_model: string;
+  unit_price?: number | null;
+  package_price?: number | null;
+  package_size?: number | null;
+  flat_fee?: number | null;
+  min_price?: number | null;
+  max_price?: number | null;
+  percentage?: number | null;
+  total_unit_quantity?: number | null;
+  units_consumed: number;
+  tier_price: string;
+}
+
+export interface QuantityPriceResponseData {
+  customer_key: string;
+  feature_key: string;
+  quantity: number;
+  price: number;
+  unit: string;
+  applied_tiers: AppliedTier[];
+}
+
+export interface QuantityPriceResponse {
+  message?: string;
+  data: QuantityPriceResponseData;
+}
+
+export interface UsageEventListItem {
+  id: string;
+  event_id: string;
+  customer_key: string;
+  feature_key?: string;
+  quantity: number;
+  timestamp: number;
+  credit_used?: number;
+  event_name?: string;
+  metadata: Record<string, any>;
+}
+
+export interface PaginationMeta {
+  current_page: number;
+  prev_page: number | null;
+  next_page: number | null;
+  total_count: number;
+  total_pages: number;
+  per_page: number;
+}
+
+export interface UsageEventListResponse {
+  statusCode?: number;
+  message?: string;
+  data: UsageEventListItem[];
+  meta: PaginationMeta;
+  errors?: any;
+}
+
+export interface CreditTransaction {
+  id: string;
+  amount: number;
+  created_at: string;
+  quantity?: number;
+  event_name?: string;
+  usage_event_id?: string;
+}
+
+export interface CreditAllocation {
+  id: string;
+  amount: number;
+  consumed: number;
+  created_at: string;
+  allocation_type: string;
+  order_id?: string;
+  invoice_id?: string;
+  order_number?: string;
+  valid_until?: string;
+  transactions: CreditTransaction[];
+}
+
+export interface Wallet {
+  id: string;
+  name: string;
+  credit_unit_singular: string;
+  credit_unit_plural: string;
+  credit_system_id: string;
+  balance: number;
+  allocations?: CreditAllocation[];
+  credit_key: string;
+  customer_key?: string;
+  low_balance_threshold?: number;
+  credit_attachment_id?: string;
+  topup_link?: string;
+}
+
+export interface WalletListResponse {
+  statusCode?: number;
+  message?: string;
+  data: Wallet[];
+  errors?: any;
+  meta?: any;
+}
+
+export interface CreditAllocationListResponse {
+  statusCode?: number;
+  message?: string;
+  data: CreditAllocation[];
+  meta?: PaginationMeta | any;
+  errors?: any;
+}
+
+export interface CreditAllocationResponse {
+  statusCode?: number;
+  message?: string;
+  data: CreditAllocation;
+  errors?: any;
+  meta?: any;
 }

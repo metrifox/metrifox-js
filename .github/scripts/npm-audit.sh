@@ -2,7 +2,7 @@
 # Auto-discovers every package-lock.json in the repo and audits each. Shipped
 # paths block the PR; test/demo/example/blind-spot paths are report-only. Writes
 # a findings table (parsed from `npm audit --json`) to the PR check's Summary.
-# npm audit reads the lockfile only — no install/lifecycle scripts run.
+# npm audit reads the lockfile only — no install/lifecycle scripts run
 #
 # Kept in a script file (not inline) so the Actions log stays clean — the
 # workflow step only echoes "bash .github/scripts/npm-audit.sh".

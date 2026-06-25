@@ -44,30 +44,10 @@ jobs:
         with:
           node-version: '20'
 
+      # Logic lives in a script file so the Actions log stays clean — only this
+      # one line is echoed, not the whole loop.
       - name: Audit every package-lock.json (block shipped, report-only test/demo)
-        shell: bash
-        run: |
-          set -uo pipefail
-          shipped_failed=0
-          while IFS= read -r lock; do
-            dir=$(dirname "$lock")
-            # Classify the directory: test/demo/example/blind-spot => report-only.
-            case "$dir" in
-              *demo*|*example*|*e2e*|*fixture*|*sample*|*test*|*spec*) mode=report-only ;;
-              *) mode=blocking ;;
-            esac
-            echo "::group::npm audit ($mode): $dir"
-            if (cd "$dir" && npm audit --audit-level=high); then
-              echo "clean: $dir"
-            elif [ "$mode" = blocking ]; then
-              echo "::error::high/critical vulnerabilities in shipped path: $dir"
-              shipped_failed=1
-            else
-              echo "::warning::high/critical vulnerabilities in report-only path: $dir (not blocking)"
-            fi
-            echo "::endgroup::"
-          done < <(find . -name package-lock.json -not -path '*/node_modules/*' | sort)
-          exit $shipped_failed
+        run: bash .github/scripts/npm-audit.sh
 
   # Static analysis (SAST) for the SDK source — catches injection/insecure
   # patterns in our own code, complementing the dependency checks above.

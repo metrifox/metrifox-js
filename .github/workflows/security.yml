@@ -27,8 +27,12 @@ jobs:
           fail-on-severity: high
           comment-summary-in-pr: on-failure
 
-  # Audits the FULL resolved dependency tree (not just the PR diff) so a PR is
-  # also blocked when an already-present transitive package is found vulnerable.
+  # Auto-discovers EVERY package-lock.json in the repo, so a newly added nested
+  # folder is covered automatically — no hardcoded path list to forget (which is
+  # how the demo/ blind spot happened). Shipped paths BLOCK the PR; test / demo /
+  # example / blind-spot paths are report-only (surfaced, non-blocking).
+  # npm audit reads the lockfile only — no install/lifecycle scripts run, keeping
+  # CI itself off the supply-chain attack surface.
   npm-audit:
     name: npm audit (high/critical)
     runs-on: ubuntu-latest
@@ -39,35 +43,31 @@ jobs:
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
           node-version: '20'
-          cache: 'npm'
 
-      # `npm ci` is intentionally omitted: the audit reads package-lock.json and
-      # never executes install/lifecycle scripts, keeping CI itself off the
-      # supply-chain attack surface.
-      - name: Audit production + dev dependencies
-        run: npm audit --audit-level=high
-
-  # Audits the demo app (demo/) for visibility. Report-only (continue-on-error)
-  # and intentionally NOT a required check: the demo is not installable today
-  # (it pins @metrifox/react-sdk@^1.x, since superseded by 2.x) and its vite
-  # high needs a major bump, so blocking PRs on it would be a false gate. Flip
-  # to blocking once the demo is modernized.
-  npm-audit-demo:
-    name: npm audit (demo, report-only)
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
-        with:
-          node-version: '20'
-
-      # Reads demo/package-lock.json only — no install/lifecycle scripts.
-      - name: Audit demo dependencies
-        working-directory: ./demo
-        run: npm audit --audit-level=high
+      - name: Audit every package-lock.json (block shipped, report-only test/demo)
+        shell: bash
+        run: |
+          set -uo pipefail
+          shipped_failed=0
+          while IFS= read -r lock; do
+            dir=$(dirname "$lock")
+            # Classify the directory: test/demo/example/blind-spot => report-only.
+            case "$dir" in
+              *demo*|*example*|*e2e*|*fixture*|*sample*|*test*|*spec*) mode=report-only ;;
+              *) mode=blocking ;;
+            esac
+            echo "::group::npm audit ($mode): $dir"
+            if (cd "$dir" && npm audit --audit-level=high); then
+              echo "clean: $dir"
+            elif [ "$mode" = blocking ]; then
+              echo "::error::high/critical vulnerabilities in shipped path: $dir"
+              shipped_failed=1
+            else
+              echo "::warning::high/critical vulnerabilities in report-only path: $dir (not blocking)"
+            fi
+            echo "::endgroup::"
+          done < <(find . -name package-lock.json -not -path '*/node_modules/*' | sort)
+          exit $shipped_failed
 
   # Static analysis (SAST) for the SDK source — catches injection/insecure
   # patterns in our own code, complementing the dependency checks above.

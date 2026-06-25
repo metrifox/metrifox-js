@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
 
-# Least-privilege default for all jobs in this workflow.
+# Least-privilege default for all jobs in this workflow
 permissions:
   contents: read
 

@@ -1,59 +1,17 @@
 version: 2
-
+# Dependabot is intentionally scoped to GitHub Actions only.
+# Vulnerable npm dependencies are caught at the PR gate (dependency-review +
+# npm audit) and insecure first-party code by CodeQL, so Dependabot's sole job
+# here is keeping the SHA-pinned actions current — it bumps the pinned commit
+# SHA and the `# vX.Y.Z` comment together in a reviewable PR.
 updates:
-  # This covers npm, yarn, and pnpm automatically based on your lockfile
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "weekly"
-      day: "tuesday"
-      time: "04:00"
-    open-pull-requests-limit: 10  
+      interval: weekly
+    commit-message:
+      prefix: ci
     groups:
-      # Group React ecosystem together
-      react-ecosystem:
-        patterns:
-          - "react*"
-          - "@types/react*"
-
-      # Testing tools
-      testing-tools:
-        patterns:
-          - "jest*"
-          - "@testing-library*"
-
-      # For internal Metrifox packages
-      metrifox-internal:
-        patterns:
-          - "@metrifox/*"
-
-      # Group all minor/patch updates together to reduce PR noise
-      minor-and-patch:
-        update-types:
-          - "minor"
-          - "patch"
-
-# 2. Demo Directory NPM Updates
-  - package-ecosystem: "npm"
-    directory: "/demo"
-    schedule:
-      interval: "weekly"
-      day: "tuesday"
-      time: "04:00"
-    open-pull-requests-limit: 10
-    groups:
-      demo-deps:
-        patterns: ["*"] 
-
-  # GitHub Actions workflows
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "tuesday"
-      time: "04:00"
-    groups:
-      # Group all GitHub Actions updates into one PR
-      actions:
+      github-actions:
         patterns:
           - "*"

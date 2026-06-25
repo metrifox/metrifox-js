@@ -24,6 +24,7 @@ while IFS= read -r lock; do
     continue
   fi
   if [ "$mode" = blocking ]; then badge='🔴 blocking'; shipped_failed=1; else badge='🟡 report-only'; fi
+  # Findings table -> PR check Summary page.
   {
     printf '\n### `%s` — %s\n\n' "$dir" "$badge"
     printf '| Package | Severity | Vulnerable range | What to do |\n'
@@ -36,6 +37,15 @@ while IFS= read -r lock; do
          elif .fixAvailable == true then "run npm audit fix"
          else "no fix available" end) + " |"'
   } >> "$GITHUB_STEP_SUMMARY"
+  # Same findings -> step log (so they're visible inline, not only the Summary).
+  printf -- '── %s — %s findings ──\n' "$dir" "$mode"
+  printf '%s' "$json" | jq -r '
+    .vulnerabilities[]? | select(.severity=="high" or .severity=="critical")
+    | "  • \(.name) (\(.severity)), range \(.range) → " +
+      (if (.fixAvailable|type)=="object"
+         then "update \(.fixAvailable.name) to \(.fixAvailable.version)" + (if .fixAvailable.isSemVerMajor then " (major)" else "" end)
+       elif .fixAvailable == true then "run npm audit fix"
+       else "no fix available" end)'
   if [ "$mode" = blocking ]; then
     printf '::error::high/critical npm vulnerabilities in shipped path: %s\n' "$dir"
   else

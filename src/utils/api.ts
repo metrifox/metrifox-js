@@ -60,6 +60,9 @@ export async function fetchUsage(
   if (request.metadata !== undefined) {
     body.metadata = request.metadata;
   }
+  if (request.properties !== undefined) {
+    body.properties = request.properties;
+  }
 
   const response = await fetch(url.toString(), {
     method: "POST",
@@ -256,4 +259,3 @@ export async function generateCheckoutUrl(
   const data = await response.json();
   return data?.data?.checkout_url;
 }
-

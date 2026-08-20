@@ -160,6 +160,7 @@ describe("Metrifox SDK", () => {
         eventId: "evt_abc123",
         timestamp: 1640995200000,
         metadata: { feature_type: "premium", session_id: "sess_xyz789" },
+        properties: { workspace_id: "workspace_42", user_id: "user_7" },
       });
 
       expect(fetch).toHaveBeenCalledWith(
@@ -178,6 +179,7 @@ describe("Metrifox SDK", () => {
             credit_used: 25,
             timestamp: 1640995200000,
             metadata: { feature_type: "premium", session_id: "sess_xyz789" },
+            properties: { workspace_id: "workspace_42", user_id: "user_7" },
           }),
         }
       );

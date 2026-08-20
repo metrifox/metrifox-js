@@ -37,6 +37,7 @@ export interface UsageEventRequest {
   creditUsed?: number; // Optional
   timestamp?: number; // Optional
   metadata?: Record<string, any>; // Optional, defaults to {}
+  properties?: Record<string, any>; // Optional values used by configured feature aggregations
 }
 
 export interface UsageEventResponseData {

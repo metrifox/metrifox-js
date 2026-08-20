@@ -45,6 +45,9 @@ export class UsagesModule extends BaseClient {
         if (request.metadata !== undefined) {
             body.metadata = request.metadata;
         }
+        if (request.properties !== undefined) {
+            body.properties = request.properties;
+        }
 
         return this.makeRequest("usage/events", {
             method: "POST",

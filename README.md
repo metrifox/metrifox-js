@@ -125,7 +125,7 @@ const access = await client.usages.checkAccess({
 });
 
 if (access.can_access) {
-  // Perform the action you want and then record usage (amount defaults to 1)
+  // Perform the action you want and then record usage (quantity defaults to 1)
   await client.usages.recordUsage({
     customerKey: "cust-7ec1e51",
     eventName: "form.created",
@@ -193,31 +193,48 @@ Record when customers use features to track consumption against their quotas:
 ```javascript
 const client = window.metrifoxClient; // or your stored client instance
 
-// Simple usage (amount = 1)
+// Simple usage (quantity = 1)
 await client.usages.recordUsage({
   customerKey: "customer_123",
   eventName: "api_call",
+  eventId: "evt_api_call_123",
 });
 
-// Custom amount for bulk operations
+// Custom quantity for bulk operations
 await client.usages.recordUsage({
   customerKey: "customer_123",
   eventName: "bulk_upload",
-  amount: 50, // Record 50 units at once
+  eventId: "evt_bulk_upload_123",
+  quantity: 50, // Record 50 units at once
 });
 
 // Advanced usage with additional metadata
 await client.usages.recordUsage({
   customerKey: "customer_123",
   eventName: "premium_feature_used",
-  amount: 1,
-  credit_used: 25, // Optional: credits consumed for this usage
-  event_id: "evt_abc123", // Optional: unique identifier for this event
+  quantity: 1,
+  creditUsed: 25, // Optional: credits consumed for this usage
+  eventId: "evt_abc123", // Required idempotency key
   timestamp: Date.now(), // Optional: custom timestamp (defaults to current time)
   metadata: { // Optional: additional context
     feature_type: "advanced_analytics",
     session_id: "sess_xyz789",
     user_agent: "Chrome/91.0"
+  }
+});
+
+// Record an event for a count_unique feature. Properties must contain every
+// field configured in the feature's aggregation_properties.
+await client.usages.recordUsage({
+  customerKey: "customer_123",
+  featureKey: "feature_active_users",
+  eventId: "evt_active_user_123",
+  properties: {
+    workspace_id: "workspace_42",
+    user_id: "user_7"
+  },
+  metadata: {
+    source: "web_app" // Context only; metadata is not used for aggregation
   }
 });
 ```
@@ -243,9 +260,9 @@ async function useFeature(metrifoxClient, customerKey, featureKey, eventName) {
       await metrifoxClient.usages.recordUsage({
         customerKey,
         eventName,
-        amount: result.unitsUsed || 1,
-        credit_used: result.creditsConsumed, // Optional: if feature consumes credits
-        event_id: result.transactionId, // Optional: for tracking specific events
+        quantity: result.unitsUsed || 1,
+        creditUsed: result.creditsConsumed, // Optional: if feature consumes credits
+        eventId: result.transactionId, // Required idempotency key
         metadata: { // Optional: additional context about the usage
           feature_version: "v2.0",
           execution_time_ms: result.duration
